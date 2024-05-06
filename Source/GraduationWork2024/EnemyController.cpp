@@ -52,22 +52,22 @@ void AEnemyController::CheckRendered(AEnemyBase* Enemy)
 
 		FVector2D ScreenSize = FVector2D::Zero();
 		GEngine->GameViewport->GetViewportSize(ScreenSize);
-		ScreenSize += FVector2D(100.0f, 100.0f);
+		ScreenSize += FVector2D(250.0f, 250.0f);
 
 		USkeletalMeshComponent* EnemyMesh = Enemy->GetMesh();
 		UFloatingPawnMovement* EnemyMovement = Enemy->GetPawnMovement();
 
 		if (EnemyMesh && EnemyMovement)
 		{
-			if (ScreenLocation.X > -100.0f && ScreenLocation.Y > -100.0f && ScreenLocation.X < ScreenSize.X && ScreenLocation.Y < ScreenSize.Y)
+			if (ScreenLocation.X > -250.0f && ScreenLocation.Y > -250.0f && ScreenLocation.X < ScreenSize.X && ScreenLocation.Y < ScreenSize.Y)
 			{
 				EnemyMesh->SetComponentTickInterval(0.0f);
 				EnemyMovement->SetComponentTickInterval(0.0f);
 			}
 			else
 			{
-				Enemy->GetMesh()->SetComponentTickInterval(1.0f);
-				EnemyMovement->SetComponentTickInterval(1.0f);
+				Enemy->GetMesh()->SetComponentTickInterval(0.1f);
+				EnemyMovement->SetComponentTickInterval(0.5f);
 			}
 		}
 	}
