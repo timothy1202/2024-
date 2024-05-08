@@ -123,15 +123,15 @@ private:
 	float Aggression_Run_Speed;
 
 
-
-
-
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UFloatingPawnMovement* GetPawnMovement() const { return PawnMovement; }
 
 	UFUNCTION(BlueprintCallable)
 	void InitEnemyController();
+
+	UFUNCTION(BlueprintCallable)
+	void Init();
 
 protected:
 	virtual void BeginPlay() override;

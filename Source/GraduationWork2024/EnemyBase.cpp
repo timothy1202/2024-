@@ -9,6 +9,7 @@
 #include "Components/WidgetComponent.h"
 #include "EnemyController.h"
 #include "Kismet/GameplayStatics.h"
+#include "MyEnemyAI_HealthWidgetBase.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -44,45 +45,48 @@ AEnemyBase::AEnemyBase()
 
 	HealthWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthWidget"));
 	HealthWidget->SetupAttachment(CapsuleComponent);
+	HealthWidget->SetWidgetClass(UMyEnemyAI_HealthWidgetBase::StaticClass());
 
 }
 
 void AEnemyBase::InitEnemyController()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("okok"));
-	//AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyController::StaticClass());
-	//if (FoundActor)
-	//{
-	//	enemy_controller = Cast<AEnemyController>(FoundActor);
-	//	if (!enemy_controller)
-	//	{
-	//		// 캐스팅 실패 처리
-	//		UE_LOG(LogTemp, Warning, TEXT("FoundActor is not an AEnemyController."));
-	//	}
-	//}
-	//else
-	//{
-	//	// FoundActor가 nullptr인 경우 처리
-	//	UE_LOG(LogTemp, Warning, TEXT("AEnemyController instance not found."));
-	//}
+	AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyController::StaticClass());
 
+	if (FoundActor)
+	{
+		enemy_controller = Cast<AEnemyController>(FoundActor);
 
-	/*AActor * FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyController::StaticClass());
+		if (!enemy_controller)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("FoundActor is not an AEnemyController."));
+		}
+		else
+		{
+			// 캐스팅 성공 시 AEnemyController 객체 생성 및 초기화
+			AEnemyController* OtherObject = GetWorld()->SpawnActor<AEnemyController>(AEnemyController::StaticClass());
+			if (OtherObject)
+			{
+				OtherObject->RegisterRenderTarget(this);
+			}
+		}
+	}
+	else
+	{
+		// FoundActor가 nullptr인 경우 로그 출력
+		UE_LOG(LogTemp, Warning, TEXT("AEnemyController instance not found."));
+	}
 
-	enemy_controller = Cast<AEnemyController>(FoundActor);*/
+}
 
-	//if (enemy_controller == nullptr)
-	//{
+void AEnemyBase::Init()
+{
+	UMyEnemyAI_HealthWidgetBase* MyWidget = Cast<UMyEnemyAI_HealthWidgetBase>(HealthWidget->GetUserWidgetObject());
+	if (MyWidget != nullptr)
+	{
+		MyWidget->Init(); // 캐스팅 성공 시 함수 호출
+	}
 
-	//}
-	//else
-	//{
-	//	AEnemyController* otherObject = GetWorld()->SpawnActor<AEnemyController>(AEnemyController::StaticClass());
-	//	if (otherObject)
-	//	{
-	//		otherObject->RegisterRenderTarget(this);
-	//	}
-	//}
 }
 
 void AEnemyBase::BeginPlay()
@@ -93,4 +97,6 @@ void AEnemyBase::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay called!"));
 
 	InitEnemyController();
+
+	Init();
 }
