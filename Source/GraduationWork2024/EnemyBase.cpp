@@ -49,22 +49,40 @@ AEnemyBase::AEnemyBase()
 
 void AEnemyBase::InitEnemyController()
 {
-	AActor * FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyController::StaticClass());
+	//UE_LOG(LogTemp, Warning, TEXT("okok"));
+	//AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyController::StaticClass());
+	//if (FoundActor)
+	//{
+	//	enemy_controller = Cast<AEnemyController>(FoundActor);
+	//	if (!enemy_controller)
+	//	{
+	//		// 캐스팅 실패 처리
+	//		UE_LOG(LogTemp, Warning, TEXT("FoundActor is not an AEnemyController."));
+	//	}
+	//}
+	//else
+	//{
+	//	// FoundActor가 nullptr인 경우 처리
+	//	UE_LOG(LogTemp, Warning, TEXT("AEnemyController instance not found."));
+	//}
 
-	enemy_controller = Cast<AEnemyController>(FoundActor);
 
-	if (enemy_controller == nullptr)
-	{
+	/*AActor * FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyController::StaticClass());
 
-	}
-	else
-	{
-		AEnemyController* otherObject = GetWorld()->SpawnActor<AEnemyController>(AEnemyController::StaticClass());
-		if (otherObject)
-		{
-			otherObject->RegisterRenderTarget(this);
-		}
-	}
+	enemy_controller = Cast<AEnemyController>(FoundActor);*/
+
+	//if (enemy_controller == nullptr)
+	//{
+
+	//}
+	//else
+	//{
+	//	AEnemyController* otherObject = GetWorld()->SpawnActor<AEnemyController>(AEnemyController::StaticClass());
+	//	if (otherObject)
+	//	{
+	//		otherObject->RegisterRenderTarget(this);
+	//	}
+	//}
 }
 
 void AEnemyBase::BeginPlay()
@@ -73,4 +91,6 @@ void AEnemyBase::BeginPlay()
 
 	// 여기에 초기화 코드 작성
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay called!"));
+
+	InitEnemyController();
 }
