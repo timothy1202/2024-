@@ -10,6 +10,8 @@
 class UCapsuleComponent;
 class USkeletalMeshComponent;
 class UArrowComponent;
+class USphereComponent;
+class UWidgetComponent;
 
 /**
  * 
@@ -34,6 +36,18 @@ private:
 
 	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UArrowComponent> ArrowComponent;
+
+	UPROPERTY(Category = PawnCollision, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USphereComponent> RecognitionBoundary;
+
+	UPROPERTY(Category = PawnCollision, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USphereComponent> PlayerAimCollision;
+
+	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UArrowComponent> ObjectDetectArrow;
+
+	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UWidgetComponent> HealthWidget;
 
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
