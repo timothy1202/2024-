@@ -12,6 +12,7 @@ class USkeletalMeshComponent;
 class UArrowComponent;
 class USphereComponent;
 class UWidgetComponent;
+class AEnemyController;
 
 /**
  * 
@@ -49,8 +50,18 @@ private:
 	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UWidgetComponent> HealthWidget;
 
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void InitEnemyController();
+
+
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UFloatingPawnMovement* GetPawnMovement() const { return PawnMovement; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	AEnemyController* enemy_controller;
+
+protected:
+	virtual void BeginPlay() override;
 
 };

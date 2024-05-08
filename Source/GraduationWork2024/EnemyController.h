@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EnemyBase.h"
 #include "GameFramework/Actor.h"
 #include "EnemyController.generated.h"
+
+class AEnemyBase;
 
 UCLASS()
 class GRADUATIONWORK2024_API AEnemyController : public AActor

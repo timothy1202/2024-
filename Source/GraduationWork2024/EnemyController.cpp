@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "EnemyBase.h"
 
 // Sets default values
 AEnemyController::AEnemyController()

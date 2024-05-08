@@ -7,9 +7,12 @@
 #include "Components/ArrowComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "EnemyController.h"
+#include "Kismet/GameplayStatics.h"
 
 AEnemyBase::AEnemyBase()
 {
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CollisionCylinder"));
@@ -42,4 +45,32 @@ AEnemyBase::AEnemyBase()
 	HealthWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthWidget"));
 	HealthWidget->SetupAttachment(CapsuleComponent);
 
+}
+
+void AEnemyBase::InitEnemyController()
+{
+	AActor * FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyController::StaticClass());
+
+	enemy_controller = Cast<AEnemyController>(FoundActor);
+
+	if (enemy_controller == nullptr)
+	{
+
+	}
+	else
+	{
+		AEnemyController* otherObject = GetWorld()->SpawnActor<AEnemyController>(AEnemyController::StaticClass());
+		if (otherObject)
+		{
+			otherObject->RegisterRenderTarget(this);
+		}
+	}
+}
+
+void AEnemyBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 여기에 초기화 코드 작성
+	UE_LOG(LogTemp, Warning, TEXT("BeginPlay called!"));
 }
