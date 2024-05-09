@@ -9,7 +9,11 @@
 #include "Components/WidgetComponent.h"
 #include "EnemyController.h"
 #include "Kismet/GameplayStatics.h"
-#include "MyEnemyAI_HealthWidgetBase.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "AIC_EnemyBase.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "BehaviorTree/BehaviorTree.h"
+
 
 AEnemyBase::AEnemyBase()
 {
@@ -45,7 +49,6 @@ AEnemyBase::AEnemyBase()
 
 	HealthWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthWidget"));
 	HealthWidget->SetupAttachment(CapsuleComponent);
-	HealthWidget->SetWidgetClass(UMyEnemyAI_HealthWidgetBase::StaticClass());
 
 }
 
@@ -63,7 +66,6 @@ void AEnemyBase::InitEnemyController()
 		}
 		else
 		{
-			// 캐스팅 성공 시 AEnemyController 객체 생성 및 초기화
 			AEnemyController* OtherObject = GetWorld()->SpawnActor<AEnemyController>(AEnemyController::StaticClass());
 			if (OtherObject)
 			{
@@ -81,11 +83,22 @@ void AEnemyBase::InitEnemyController()
 
 void AEnemyBase::Init()
 {
-	UMyEnemyAI_HealthWidgetBase* MyWidget = Cast<UMyEnemyAI_HealthWidgetBase>(HealthWidget->GetUserWidgetObject());
-	if (MyWidget != nullptr)
+	cur_health = EnemyNpc_MaxHealth;
+	RecognitionBoundary->SetSphereRadius(EnemyNpc_AtkDist, true); 
+
+	FVector Origin;
+	FVector BoxExtent;
+	float SphereRadius;
+	UKismetSystemLibrary::GetComponentBounds(Mesh,Origin, BoxExtent, SphereRadius);
+	show_health_dis = SphereRadius;
+
+	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
+	AAIC_EnemyBase* EnemyController = Cast<AAIC_EnemyBase>(MyController);
+	if (EnemyController)
 	{
-		MyWidget->Init(); // 캐스팅 성공 시 함수 호출
+		EnemyController->ExecuteBT(MyBehaviorTree);
 	}
+
 
 }
 
@@ -93,7 +106,6 @@ void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 여기에 초기화 코드 작성
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay called!"));
 
 	InitEnemyController();

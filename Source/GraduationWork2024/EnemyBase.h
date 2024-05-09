@@ -13,6 +13,7 @@ class UArrowComponent;
 class USphereComponent;
 class UWidgetComponent;
 class AEnemyController;
+class UBehaviorTree;
 
 /**
  * 
@@ -122,6 +123,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float Aggression_Run_Speed;
 
+//체력 관련
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float cur_health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float show_health_dis;
+
+//BT 관련
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UBehaviorTree* MyBehaviorTree;
 
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
