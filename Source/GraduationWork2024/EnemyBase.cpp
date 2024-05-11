@@ -13,6 +13,13 @@
 #include "AIC_EnemyBase.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "GameFramework/Character.h"
+#include "Components/SceneComponent.h"
+#include "ATPInterface.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Components/PrimitiveComponent.h"
+#include "Animation/AnimInstance.h"
 
 
 AEnemyBase::AEnemyBase()
@@ -90,7 +97,7 @@ void AEnemyBase::Init()
 	FVector BoxExtent;
 	float SphereRadius;
 	UKismetSystemLibrary::GetComponentBounds(Mesh,Origin, BoxExtent, SphereRadius);
-	show_health_dis = SphereRadius;
+	show_health_dis = SphereRadius * 1.5f;
 
 	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
 	AAIC_EnemyBase* EnemyController = Cast<AAIC_EnemyBase>(MyController);
@@ -99,6 +106,263 @@ void AEnemyBase::Init()
 		EnemyController->ExecuteBT(MyBehaviorTree);
 	}
 
+	if (aggresive)
+	{
+		PawnMovement->MaxSpeed = EnemyNpc_RunSpeed;
+	}
+
+	AAIController* AIController = Cast<AAIController>(GetController());
+
+	if (AIController)
+	{
+		UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			BlackboardComp->SetValueAsBool("Is Aggressive", true);
+		}
+	}
+
+}
+
+void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!aggresive)
+	{
+		if (OtherComp->ComponentHasTag("Player"))
+		{
+			ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+			SetAttackTarget(PlayerCharacter);
+		}
+	}
+}
+
+void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!aggresive)
+	{
+		if(!NeverStopChasing)
+		if (OtherComp->ComponentHasTag("Player"))
+		{
+			SetAttackTarget(nullptr);
+		}
+	}
+}
+
+void AEnemyBase::SetAttackTarget(AActor* AttackTarget)
+{
+	HighestATPTarget = AttackTarget;
+	AAIController* AIController = Cast<AAIController>(GetController());
+	UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+
+	if (IsValid(HighestATPTarget))
+	{
+		BlackboardComp->SetValueAsObject("Attack Target", HighestATPTarget);
+	}
+
+}
+
+void AEnemyBase::DetectOtherObject()
+{
+	FVector Start = ObjectDetectArrow->GetComponentLocation();
+	FVector End = (ObjectDetectArrow->GetForwardVector() * 80.0f)+Start;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes; 
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)); 
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel4));
+	TArray<AActor*> ActorsToIgnore; 
+	FHitResult OutHit; 
+
+	bool bHit = UKismetSystemLibrary::LineTraceSingleForObjects(
+		GetWorld(),
+		Start,
+		End,
+		ObjectTypes,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::ForDuration,
+		OutHit,
+		true,
+		FLinearColor::Red,
+		FLinearColor::Green,
+		0.0f
+	);
+
+	if (bHit)
+	{
+		if (OutHit.GetActor()->Tags.Contains(FName("EnemyDetect")) && OutHit.GetActor()!=HighestATPTarget)
+		{
+			detect_other_objects = true;
+			HighestATPTarget = OutHit.GetActor();
+		}
+	}
+	else
+	{
+		detect_other_objects = false;
+	}
+
+
+}
+
+TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
+{
+	AActor* HighestTarget;
+	int32 ATP;
+
+	TArray<AActor*> OverlappingActors;
+	TArray<AActor*> TaggedActors;
+
+	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor->ActorHasTag(TEXT("Player")))
+		{
+			TaggedActors.Add(Actor);
+		}
+	}
+
+	int Value = TaggedActors.Num();
+
+	switch (Value)
+	{
+	case 0:
+	{
+		HighestTarget = NULL;
+		ATP = NULL;
+		break;
+	}
+	case 1:
+	{
+		ACharacter* PlayerCharacter = Cast<ACharacter>(TaggedActors[0]);
+
+		if (PlayerCharacter)
+		{
+			ATP = 110;
+			HighestTarget = PlayerCharacter;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	return TPair<AActor*, int32>();
+}
+
+TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
+{
+	AActor* HighestTarget;
+	int32 ATP;
+	TArray<int32> AtpArray;
+
+	TArray<AActor*> OverlappingActors;
+	TArray<AActor*> TaggedActors;
+
+	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor->ActorHasTag(TEXT("FriendlyBuilding")))
+		{
+			TaggedActors.Add(Actor);
+		}
+	}
+
+	int Value = TaggedActors.Num();
+
+	switch (Value)
+	{
+		case 0:
+		{
+			HighestTarget = NULL;
+			ATP = NULL;
+			break;
+		}
+		case 1:
+		{
+			AActor* SomeActor = TaggedActors[0];
+			IATPInterface* myInterFace = Cast<IATPInterface>(SomeActor);
+			if (myInterFace)
+			{
+				ATP = myInterFace->GetATP();
+			}
+			HighestTarget = TaggedActors[0];
+			break;
+		}
+		default:
+		{
+			for (int i = 0; i < TaggedActors.Num(); i++)
+			{
+				AActor* SomeActor = TaggedActors[i];
+				IATPInterface* myInterFace = Cast<IATPInterface>(SomeActor);
+				if (myInterFace)
+				{
+					AtpArray.Add(myInterFace->GetATP());
+				}
+			}
+
+			int32 IndexOfMaxValue;
+			UKismetMathLibrary::MaxOfIntArray(AtpArray, IndexOfMaxValue, ATP);
+			HighestTarget = TaggedActors[IndexOfMaxValue];
+			break;
+		}
+	}
+
+	return TPair<AActor*, int32>();
+}
+
+void AEnemyBase::CheckDistance()
+{
+	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+	float Distance;
+	if (PlayerCharacter != nullptr)
+	{
+		Distance = GetHorizontalDistanceTo(PlayerCharacter);
+	}
+
+	if (Distance < show_health_dis)
+		HealthWidget->SetVisibility(true);
+	else
+		HealthWidget->SetVisibility(false);
+
+}
+
+void AEnemyBase::UpdateDamagedHealthBar(float damage)
+{
+	cur_health = cur_health - damage;
+}
+
+void AEnemyBase::NpcDead()
+{
+	RecognitionBoundary->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PlayerAimCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	APawn::DetachFromControllerPendingDestroy();
+
+	DropItem();
+	playitem_for_bp(); //Play Die Effect 노드용 함수
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	float MontageLength;
+
+	if (AnimInstance && DieMontage)
+	{
+		MontageLength = AnimInstance->Montage_Play(DieMontage, 1.0f, EMontagePlayReturnType::MontageLength);
+	}
+
+}
+
+void AEnemyBase::DropItem()
+{
+	if (!aggresive)
+	{
+		drop_count = UKismetMathLibrary::RandomIntegerInRange(item_min_drop_count, item_max_drop_count);
+		angle = UKismetMathLibrary::RandomFloatInRange(0.0f, 360.0f);
+	}
+}
+
+void AEnemyBase::playitem_for_bp()
+{
 
 }
 
@@ -112,3 +376,26 @@ void AEnemyBase::BeginPlay()
 
 	Init();
 }
+
+void AEnemyBase::Tick(float DeltaTime)
+{
+	if (!IsNpcDead)
+	{
+		if (aggresive)
+		{
+			DetectOtherObject();
+			if (!detect_other_objects)
+			{
+				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
+				TPair<AActor*, int32> player_result = GetPlayerATP();
+				if (building_result.Value > player_result.Value)
+					HighestATPTarget = building_result.Key;
+				else
+					HighestATPTarget = player_result.Key;
+			}
+		}
+
+		CheckDistance();
+	}
+}
+

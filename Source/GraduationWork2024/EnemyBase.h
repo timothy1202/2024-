@@ -130,9 +130,41 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float show_health_dis;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool IsNpcDead;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DieMontage;
+
 //BT 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* MyBehaviorTree;
+
+//침략 관련
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool aggresive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	AActor* HighestATPTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool detect_other_objects;
+
+//사냥 관련
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool NeverStopChasing;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int32 item_min_drop_count;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int32 item_max_drop_count;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int32 drop_count;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float angle;
 
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
@@ -144,7 +176,36 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Init();
 
+	void Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION(BlueprintCallable)
+	void SetAttackTarget(AActor * AttackTarget);
+
+	void DetectOtherObject();
+	
+	TPair<AActor*, int32> GetPlayerATP();
+	TPair<AActor*, int32> GetHighestBuildingATP();
+
+	void CheckDistance();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateDamagedHealthBar(float damage);
+
+	UFUNCTION(BlueprintCallable)
+	void NpcDead();
+
+	UFUNCTION(BlueprintCallable)
+	void DropItem();
+
+	UFUNCTION(BlueprintCallable)
+	void playitem_for_bp();
+
 protected:
 	virtual void BeginPlay() override;
+
+public:
+	virtual void Tick(float DeltaTime) override;
 
 };
