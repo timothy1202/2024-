@@ -313,7 +313,7 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 void AEnemyBase::CheckDistance()
 {
 	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
-	float Distance;
+	float Distance=0;
 	if (PlayerCharacter != nullptr)
 	{
 		Distance = GetHorizontalDistanceTo(PlayerCharacter);
@@ -348,8 +348,26 @@ void AEnemyBase::NpcDead()
 	if (AnimInstance && DieMontage)
 	{
 		MontageLength = AnimInstance->Montage_Play(DieMontage, 1.0f, EMontagePlayReturnType::MontageLength);
+		
 	}
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::NpcDeadAfterDelay, MontageLength, false);
 
+}
+
+void AEnemyBase::NpcDeadAfterDelay()
+{
+	Mesh->bPauseAnims;
+	if (IsValid(enemy_controller))
+	{
+		enemy_controller->RemoveFromRenderTarget(this);
+	}
+	DestroyActor();
+}
+
+void AEnemyBase::DestroyActor()
+{
+	AActor::Destroy();
 }
 
 void AEnemyBase::DropItem()

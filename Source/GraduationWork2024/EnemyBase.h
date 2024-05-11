@@ -202,6 +202,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void playitem_for_bp();
 
+	void NpcDeadAfterDelay();
+
+	UFUNCTION(BlueprintCallable)
+	void DestroyActor();
+
 protected:
 	virtual void BeginPlay() override;
 
