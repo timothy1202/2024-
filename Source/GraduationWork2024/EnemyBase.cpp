@@ -365,7 +365,7 @@ void AEnemyBase::NpcDeadAfterDelay()
 	DestroyActor();
 }
 
-void AEnemyBase::DestroyActor()
+void AEnemyBase::DestroyActor_Implementation()
 {
 	AActor::Destroy();
 }
@@ -417,3 +417,127 @@ void AEnemyBase::Tick(float DeltaTime)
 	}
 }
 
+void AEnemyBase::FirstThunderAttacked()
+{
+	TowerThunderTarget = this;
+	if (IsValid(FirstThunderTarget))
+	{
+		SpawnFirstThunder(FirstThunderTarget);
+	}
+}
+
+void AEnemyBase::FindFirstThunderTarget()
+{
+	float Distance;
+	TArray<float> DisArray;
+
+	TArray<AActor*> OverlappingActors;
+	TArray<AActor*> TaggedActors;
+
+	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor->ActorHasTag(TEXT("Enemy")))
+		{
+			TaggedActors.Add(Actor);
+		}
+	}
+
+	int Value = TaggedActors.Num();
+
+	switch (Value)
+	{
+		case 0:
+			break;
+		case 1:
+			break;
+		default:
+		{
+			for (int i = 0; i < TaggedActors.Num(); i++)
+			{
+				if (TaggedActors[i] != this)
+				{
+					Distance = UKismetMathLibrary::Vector_Distance(TaggedActors[i]->GetActorLocation(), GetActorLocation());
+					DisArray.Add(Distance);
+				}
+				else
+				{
+					DisArray.Add(1000000000.0f);
+				}
+			}
+
+			int32 IndexOfMinValue;
+			UKismetMathLibrary::MinOfFloatArray(DisArray, IndexOfMinValue, Distance);
+			FirstThunderTarget = TaggedActors[IndexOfMinValue];
+			break;
+		}
+	}
+}
+
+void AEnemyBase::SecondThunderAttacked()
+{
+	FindSecondThunderTarget(TowerThunderTarget);
+	if (IsValid(SecondThunderTarget))
+	{
+		SpawnSecondThunder(SecondThunderTarget);
+	}
+}
+
+void AEnemyBase::FindSecondThunderTarget(AActor* tower_target)
+{
+	float Distance;
+	TArray<float> DisArray;
+
+	TArray<AActor*> OverlappingActors;
+	TArray<AActor*> TaggedActors;
+
+	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor->ActorHasTag(TEXT("Enemy")))
+		{
+			TaggedActors.Add(Actor);
+		}
+	}
+
+	int Value = TaggedActors.Num();
+
+	switch (Value)
+	{
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+		{
+			if (TaggedActors[1] != this && TaggedActors[1] != tower_target)
+			{
+				SecondThunderTarget = TaggedActors[1];
+			}
+			break;
+		}
+		default:
+		{
+			for (int i = 0; i < TaggedActors.Num(); i++)
+			{
+				if (TaggedActors[i] == this || TaggedActors[i] == tower_target)
+				{
+					DisArray.Add(10000000000.0f);
+				}
+				else
+				{
+					Distance = UKismetMathLibrary::Vector_Distance(TaggedActors[i]->GetActorLocation(), GetActorLocation());
+					DisArray.Add(Distance);
+				}
+			}
+
+			int32 IndexOfMinValue;
+			UKismetMathLibrary::MinOfFloatArray(DisArray, IndexOfMinValue, Distance);
+			SecondThunderTarget = TaggedActors[IndexOfMinValue];
+			break;
+		}
+	}
+
+}

@@ -166,6 +166,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float angle;
 
+//번개 관련
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	AActor* FirstThunderTarget; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	AActor* SecondThunderTarget;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	AActor* TowerThunderTarget;
+
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UFloatingPawnMovement* GetPawnMovement() const { return PawnMovement; }
@@ -204,8 +214,26 @@ public:
 
 	void NpcDeadAfterDelay();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void DestroyActor();
+
+	UFUNCTION(BlueprintCallable)
+	void FirstThunderAttacked();
+
+	UFUNCTION(BlueprintCallable)
+	void SecondThunderAttacked();
+
+	UFUNCTION(BlueprintCallable)
+	void FindSecondThunderTarget(AActor* tower_target);
+
+	UFUNCTION(BlueprintCallable)
+	void FindFirstThunderTarget();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void SpawnFirstThunder(AActor * tunder_target);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void SpawnSecondThunder(AActor* tunder_target);
 
 protected:
 	virtual void BeginPlay() override;
