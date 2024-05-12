@@ -73,11 +73,7 @@ void AEnemyBase::InitEnemyController()
 		}
 		else
 		{
-			AEnemyController* OtherObject = GetWorld()->SpawnActor<AEnemyController>(AEnemyController::StaticClass());
-			if (OtherObject)
-			{
-				OtherObject->RegisterRenderTarget(this);
-			}
+			enemy_controller->RegisterRenderTarget(this);
 		}
 	}
 	else
@@ -109,13 +105,8 @@ void AEnemyBase::Init()
 	if (aggresive)
 	{
 		PawnMovement->MaxSpeed = EnemyNpc_RunSpeed;
-	}
 
-	AAIController* AIController = Cast<AAIController>(GetController());
-
-	if (AIController)
-	{
-		UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
 		if (BlackboardComp)
 		{
 			BlackboardComp->SetValueAsBool("Is Aggressive", true);
@@ -151,20 +142,21 @@ void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, A
 void AEnemyBase::SetAttackTarget(AActor* AttackTarget)
 {
 	HighestATPTarget = AttackTarget;
-	AAIController* AIController = Cast<AAIController>(GetController());
-	UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
+	UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
 
 	if (IsValid(HighestATPTarget))
-	{
 		BlackboardComp->SetValueAsObject("Attack Target", HighestATPTarget);
-	}
+	else
+		BlackboardComp->SetValueAsObject("Attack Target", nullptr);
 
 }
 
 void AEnemyBase::DetectOtherObject()
 {
 	FVector Start = ObjectDetectArrow->GetComponentLocation();
-	FVector End = (ObjectDetectArrow->GetForwardVector() * 80.0f)+Start;
+	FVector End = (ObjectDetectArrow->GetForwardVector() * 150.0f)+Start;
+
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes; 
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)); 
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel4));
@@ -284,8 +276,8 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 			if (myInterFace)
 			{
 				ATP = myInterFace->GetATP();
+				HighestTarget = TaggedActors[0];
 			}
-			HighestTarget = TaggedActors[0];
 			break;
 		}
 		default:
@@ -340,10 +332,10 @@ void AEnemyBase::NpcDead()
 	APawn::DetachFromControllerPendingDestroy();
 
 	DropItem();
-	playitem_for_bp(); //Play Die Effect 노드용 함수
+	PlayDieEffectFun(); //Play Die Effect 노드용 함수
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	float MontageLength;
+	float MontageLength=0;
 
 	if (AnimInstance && DieMontage)
 	{
@@ -368,20 +360,6 @@ void AEnemyBase::NpcDeadAfterDelay()
 void AEnemyBase::DestroyActor_Implementation()
 {
 	AActor::Destroy();
-}
-
-void AEnemyBase::DropItem()
-{
-	if (!aggresive)
-	{
-		drop_count = UKismetMathLibrary::RandomIntegerInRange(item_min_drop_count, item_max_drop_count);
-		angle = UKismetMathLibrary::RandomFloatInRange(0.0f, 360.0f);
-	}
-}
-
-void AEnemyBase::playitem_for_bp()
-{
-
 }
 
 void AEnemyBase::BeginPlay()
@@ -539,5 +517,48 @@ void AEnemyBase::FindSecondThunderTarget(AActor* tower_target)
 			break;
 		}
 	}
+
+}
+
+void AEnemyBase::SpawnFirstThunder(AActor* ThunderTarget)
+{
+	//WhatsTarget = ThunderTarget;
+
+	//if (IsValid(WhatsTarget))
+	//{
+	//	UClass* ActorToSpawn = AYourActorClass::StaticClass(); 
+
+	//	FVector Location = GetActorLocation(); 
+	//	FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), WhatsTarget->GetActorLocation());
+
+	//	FVector Scale(GetDistanceTo(WhatsTarget) / ThunderScale);
+	//	FTransform SpawnTransform(Rotation, Location, Scale);
+
+	//	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(
+	//		ActorToSpawn, 
+	//		NAME_None, 
+	//		&SpawnTransform.GetLocation(), 
+	//		&SpawnTransform.GetRotation().Rotator(), 
+	//		nullptr, // Template, 기본값 사용
+	//		false, // bNoCollisionFail, 충돌 실패를 허용하지 않음
+	//		false, // bRemoteOwned, 원격 소유를 허용하지 않음
+	//		this, // Owner, 이 액터를 소유자로 설정
+	//		GetInstigator(), // Instigator
+	//		true, // bNoFail, 스폰 실패를 허용하지 않음
+	//		nullptr, // OverrideLevel, 기본값 사용
+	//		true // bDeferConstruction, 생성을 지연시킴 (초기화 후 필요한 설정을 할 수 있도록 함)
+	//	);
+
+	//	// 필요한 경우 추가 설정
+	//	if (SpawnedActor && bDeferConstruction)
+	//	{
+	//		SpawnedActor->FinishSpawning(SpawnTransform);
+	//	}
+	//}
+}
+
+
+void AEnemyBase::SpawnSecondThunder(AActor* tunder_target)
+{
 
 }

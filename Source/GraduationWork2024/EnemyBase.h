@@ -166,6 +166,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float angle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float desired_angle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float item_drop_distance;
+
+
 //번개 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	AActor* FirstThunderTarget; 
@@ -175,6 +182,12 @@ private:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	AActor* TowerThunderTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	AActor* WhatsTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float ThunderScale;
 
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
@@ -206,11 +219,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void NpcDead();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintImplementableEvent)
 	void DropItem();
 
-	UFUNCTION(BlueprintCallable)
-	void playitem_for_bp();
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayDieEffectFun();
 
 	void NpcDeadAfterDelay();
 
@@ -229,10 +242,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FindFirstThunderTarget();
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SpawnFirstThunder(AActor * tunder_target);
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SpawnSecondThunder(AActor* tunder_target);
 
 protected:
