@@ -9,9 +9,7 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine",
-				"AIModule",
-				"UMG"
+				"Engine"
 			]
 		}
 	],
@@ -25,14 +23,6 @@
 		},
 		{
 			"Name": "PCG",
-			"Enabled": true
-		},
-		{
-			"Name": "AnimToTexture",
-			"Enabled": true
-		},
-		{
-			"Name": "AnimationBudgetAllocator",
 			"Enabled": true
 		}
 	]
