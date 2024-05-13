@@ -43,6 +43,9 @@ AEnemyBase::AEnemyBase()
 
 	RecognitionBoundary = CreateDefaultSubobject<USphereComponent>(TEXT("RecognitionBoundary"));
 	RecognitionBoundary->SetupAttachment(CapsuleComponent);
+	RecognitionBoundary->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapBegin);
+	RecognitionBoundary->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapEnd);
+
 
 	PlayerAimCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PlayerAimCollision"));
 	PlayerAimCollision->SetupAttachment(CapsuleComponent);
@@ -126,7 +129,7 @@ void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	}
 }
 
-void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (!aggresive)
 	{
