@@ -44,8 +44,6 @@ AEnemyBase::AEnemyBase()
 	RecognitionBoundary = CreateDefaultSubobject<USphereComponent>(TEXT("RecognitionBoundary"));
 	RecognitionBoundary->SetupAttachment(CapsuleComponent);
 
-	RecognitionBoundary->SetCollisionProfileName(TEXT("Custom"));
-
 	PlayerAimCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PlayerAimCollision"));
 	PlayerAimCollision->SetupAttachment(CapsuleComponent);
 
@@ -398,9 +396,11 @@ void AEnemyBase::Tick(float DeltaTime)
 void AEnemyBase::FirstThunderAttacked()
 {
 	TowerThunderTarget = this;
+	FindFirstThunderTarget();
 	if (IsValid(FirstThunderTarget))
-	{
+	{   
 		SpawnFirstThunder(FirstThunderTarget);
+		UE_LOG(LogTemp, Warning, TEXT("FirstThunderAttacked called!"));
 	}
 }
 
@@ -409,16 +409,17 @@ void AEnemyBase::FindFirstThunderTarget()
 	float Distance;
 	TArray<float> DisArray;
 
-	TArray<AActor*> OverlappingActors;
+	TArray<UPrimitiveComponent*> OverlappingComponents;
 	TArray<AActor*> TaggedActors;
 
-	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+	RecognitionBoundary->GetOverlappingComponents(OverlappingComponents);
 
-	for (AActor* Actor : OverlappingActors)
+	for (UPrimitiveComponent* Component : OverlappingComponents)
 	{
-		if (Actor->ActorHasTag(TEXT("Enemy")))
+		if (Component->ComponentHasTag(TEXT("Enemy")))
 		{
-			TaggedActors.Add(Actor);
+			UE_LOG(LogTemp, Warning, TEXT("Enemy Detected"));
+			TaggedActors.Add(Component->GetOwner());
 		}
 	}
 
@@ -427,9 +428,15 @@ void AEnemyBase::FindFirstThunderTarget()
 	switch (Value)
 	{
 		case 0:
+		{
+			UE_LOG(LogTemp, Warning, TEXT("FindFirstThunderTarget called! 000"));
 			break;
+		}
 		case 1:
+		{
+			UE_LOG(LogTemp, Warning, TEXT("FindFirstThunderTarget called! 11"));
 			break;
+		}
 		default:
 		{
 			for (int i = 0; i < TaggedActors.Num(); i++)
@@ -448,6 +455,7 @@ void AEnemyBase::FindFirstThunderTarget()
 			int32 IndexOfMinValue;
 			UKismetMathLibrary::MinOfFloatArray(DisArray, IndexOfMinValue, Distance);
 			FirstThunderTarget = TaggedActors[IndexOfMinValue];
+			UE_LOG(LogTemp, Warning, TEXT("FindFirstThunderTarget called! default"));
 			break;
 		}
 	}
@@ -467,16 +475,17 @@ void AEnemyBase::FindSecondThunderTarget(AActor* tower_target)
 	float Distance;
 	TArray<float> DisArray;
 
-	TArray<AActor*> OverlappingActors;
+	TArray<UPrimitiveComponent*> OverlappingComponents;
 	TArray<AActor*> TaggedActors;
 
-	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+	RecognitionBoundary->GetOverlappingComponents(OverlappingComponents);
 
-	for (AActor* Actor : OverlappingActors)
+	for (UPrimitiveComponent* Component : OverlappingComponents)
 	{
-		if (Actor->ActorHasTag(TEXT("Enemy")))
+		if (Component->ComponentHasTag(TEXT("Enemy")))
 		{
-			TaggedActors.Add(Actor);
+			UE_LOG(LogTemp, Warning, TEXT("Enemy Detected"));
+			TaggedActors.Add(Component->GetOwner());
 		}
 	}
 
