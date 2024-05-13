@@ -242,10 +242,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FindFirstThunderTarget();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnFirstThunder(AActor * tunder_target);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnSecondThunder(AActor* tunder_target);
 
 protected:
