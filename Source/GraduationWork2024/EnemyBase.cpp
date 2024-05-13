@@ -31,7 +31,6 @@ AEnemyBase::AEnemyBase()
 	RootComponent = CapsuleComponent;
 	CapsuleComponent->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 
-
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
 	ArrowComponent->SetupAttachment(CapsuleComponent);
 
@@ -44,9 +43,6 @@ AEnemyBase::AEnemyBase()
 
 	RecognitionBoundary = CreateDefaultSubobject<USphereComponent>(TEXT("RecognitionBoundary"));
 	RecognitionBoundary->SetupAttachment(CapsuleComponent);
-	RecognitionBoundary->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapBegin);
-	RecognitionBoundary->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapEnd);
-
 
 	PlayerAimCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PlayerAimCollision"));
 	PlayerAimCollision->SetupAttachment(CapsuleComponent);
@@ -117,7 +113,8 @@ void AEnemyBase::Init()
 
 }
 
-void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp,int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("beginOverlap called!"));
 	if (!aggresive)
@@ -130,7 +127,8 @@ void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	}
 }
 
-void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (!aggresive)
 	{
@@ -326,7 +324,7 @@ void AEnemyBase::UpdateDamagedHealthBar(float damage)
 	cur_health = cur_health - damage;
 }
 
-void AEnemyBase::NpcDead()
+void AEnemyBase::NpcDead_Implementation()
 {
 	RecognitionBoundary->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PlayerAimCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -370,6 +368,9 @@ void AEnemyBase::BeginPlay()
 	Super::BeginPlay();
 
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay called!"));
+
+	RecognitionBoundary->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapBegin);
+	RecognitionBoundary->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapEnd);
 
 	InitEnemyController();
 
