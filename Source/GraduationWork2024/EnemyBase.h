@@ -193,6 +193,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool is_playing_skill;
+
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UFloatingPawnMovement* GetPawnMovement() const { return PawnMovement; }
@@ -222,6 +225,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void NpcDead();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void NpcDeadchild();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DropItem();

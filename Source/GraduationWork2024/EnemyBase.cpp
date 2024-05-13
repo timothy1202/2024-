@@ -31,13 +31,14 @@ AEnemyBase::AEnemyBase()
 	RootComponent = CapsuleComponent;
 	CapsuleComponent->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 
+
+	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
+	ArrowComponent->SetupAttachment(CapsuleComponent);
+
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(CapsuleComponent);
 	Mesh->SetCollisionProfileName(TEXT("CharacterMesh"));
 	Mesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
-
-	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
-	ArrowComponent->SetupAttachment(CapsuleComponent);
 
 	PawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("PawnMovement"));
 
