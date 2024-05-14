@@ -122,9 +122,44 @@ void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	{
 		if (OtherComp->ComponentHasTag("Player"))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("kkkkkd!"));
 			ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 			SetAttackTarget(PlayerCharacter);
+		}
+	}
+	else
+	{
+		if (!detect_other_objects)
+		{
+			if (OtherComp->ComponentHasTag("Player")|| OtherComp->ComponentHasTag("FriendlyBuilding"))
+			{
+				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
+				TPair<AActor*, int32> player_result = GetPlayerATP();
+
+				UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
+				if (building_result.Key != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
+				}
+
+				UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
+				if (player_result.Key != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
+				}
+
+				if (building_result.Value > player_result.Value)
+					HighestATPTarget = building_result.Key;
+				else
+					HighestATPTarget = player_result.Key;
+			}
 		}
 	}
 }
@@ -134,10 +169,48 @@ void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, A
 {
 	if (!aggresive)
 	{
-		if(!NeverStopChasing)
-		if (OtherComp->ComponentHasTag("Player"))
+		if (!NeverStopChasing)
 		{
-			SetAttackTarget(nullptr);
+			if (OtherComp->ComponentHasTag("Player"))
+			{
+				SetAttackTarget(nullptr);
+			}
+		}
+	}
+	else
+	{
+		if (!detect_other_objects)
+		{
+			if (OtherComp->ComponentHasTag("Player") || OtherComp->ComponentHasTag("FriendlyBuilding"))
+			{
+				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
+				TPair<AActor*, int32> player_result = GetPlayerATP();
+
+				UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
+				if (building_result.Key != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
+				}
+
+				UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
+				if (player_result.Key != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
+				}
+
+				if (building_result.Value > player_result.Value)
+					HighestATPTarget = building_result.Key;
+				else
+					HighestATPTarget = player_result.Key;
+			}
 		}
 	}
 }
@@ -218,6 +291,11 @@ void AEnemyBase::DetectOtherObject()
 
 }
 
+void AEnemyBase::DetectAroundATPObject()
+{
+
+}
+
 TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 {
 	AActor* HighestTarget;
@@ -235,7 +313,7 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 
 		if (PlayerTaggedComponents.Num() > 0)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'Player' tagged component: %s"), *Actor->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'Player' tagged component: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
 	}
@@ -290,19 +368,8 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'FriendlyBuilding' tagged component: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
+		else UE_LOG(LogTemp, Warning, TEXT("PlayerTaggedComponents.Num() is null"));
 	}
-
-	//RecognitionBoundary->GetOverlappingActors(OverlappingActors);
-
-	//for (AActor* Actor : OverlappingActors)
-	//{
-
-	//	if (Actor->ActorHasTag(TEXT("Player")))
-	//	{
-	//		//UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor: %s"), *Actor->GetName());
-	//		TaggedActors.Add(Actor);
-	//	}
-	//}
 
 	int Value = TaggedActors.Num();
 
@@ -317,12 +384,18 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 		case 1:
 		{
 			AActor* SomeActor = TaggedActors[0];
-			IATPInterface* myInterFace = Cast<IATPInterface>(SomeActor);
-			if (myInterFace)
+			if (SomeActor->GetClass()->ImplementsInterface(UATPInterface::StaticClass()))
 			{
-				ATP = myInterFace->GetATP();
-				HighestTarget = TaggedActors[0];
+				int32 ActorATP = IATPInterface::Execute_GetATP(SomeActor);
+				ATP = ActorATP;
+				HighestTarget = SomeActor;
 			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
+			}
+
+
 			break;
 		}
 		default:
@@ -330,12 +403,17 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 			for (int i = 0; i < TaggedActors.Num(); i++)
 			{
 				AActor* SomeActor = TaggedActors[i];
-				IATPInterface* myInterFace = Cast<IATPInterface>(SomeActor);
-				if (myInterFace)
+				if (SomeActor->Implements<UATPInterface>())
 				{
-					AtpArray.Add(myInterFace->GetATP());
+					IATPInterface* myInterface = Cast<IATPInterface>(SomeActor);
+					if (myInterface)
+					{
+						AtpArray.Add(myInterface->GetATP());
+					}
 				}
+				else UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
 			}
+
 
 			int32 IndexOfMaxValue;
 			UKismetMathLibrary::MaxOfIntArray(AtpArray, IndexOfMaxValue, ATP);
@@ -450,41 +528,6 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	if (!IsNpcDead)
 	{
-		if (aggresive)
-		{
-			DetectOtherObject();
-			if (!detect_other_objects)
-			{
-				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
-				TPair<AActor*, int32> player_result = GetPlayerATP();
-
-				//UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
-				if (building_result.Key != nullptr)
-				{
-					//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
-				}
-				else
-				{
-					//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
-				}
-
-				//UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
-				if (player_result.Key != nullptr)
-				{
-					//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
-				}
-				else
-				{
-					//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
-				}
-
-				if (building_result.Value > player_result.Value)
-					HighestATPTarget = building_result.Key;
-				else
-					HighestATPTarget = player_result.Key;
-			}
-		}
-
 		CheckDistance();
 	}
 }
