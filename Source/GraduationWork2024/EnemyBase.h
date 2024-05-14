@@ -221,7 +221,6 @@ public:
 
 	void DetectOtherObject();
 
-	void DetectAroundATPObject();
 	
 	TPair<AActor*, int32> GetPlayerATP();
 	TPair<AActor*, int32> GetHighestBuildingATP();

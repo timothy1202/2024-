@@ -254,49 +254,43 @@ void AEnemyBase::DetectOtherObject()
 	FVector Start = ObjectDetectArrow->GetComponentLocation();
 	FVector End = (ObjectDetectArrow->GetForwardVector() * 150.0f)+Start;
 
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes; 
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)); 
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel4));
-	TArray<AActor*> ActorsToIgnore; 
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this); 
+
+	ECollisionChannel TraceChannel = ECC_Visibility;
+	/*FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
+	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel4);*/
+
 	FHitResult OutHit; 
 
-	bool bHit = UKismetSystemLibrary::LineTraceSingleForObjects(
-		GetWorld(),
-		Start,
-		End,
-		ObjectTypes,
-		false,
-		ActorsToIgnore,
-		EDrawDebugTrace::ForDuration,
-		OutHit,
-		true,
-		FLinearColor::Red,
-		FLinearColor::Green,
-		0.0f
-	);
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, TraceChannel, CollisionParams);
+#if WITH_EDITOR
 
-	if (bHit)
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 1);
+#endif
+
+
+	if (bIsHit)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is true"));
-		if (OutHit.GetActor()->Tags.Contains(FName("EnemyDetect")) && OutHit.GetActor()!=HighestATPTarget)
-		{
+			UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is true"));
 			detect_other_objects = true;
 			HighestATPTarget = OutHit.GetActor();
+		UPrimitiveComponent* HitComponent = OutHit.GetComponent();
+		if (HitComponent != nullptr && HitComponent->ComponentHasTag(FName("EnemyDetect")) /* && OutHit.GetActor() != HighestATPTarget*/)
+		{
 		}
+		else UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is false2222"));
 	}
+
 	else
 	{
 		detect_other_objects = false;
 		UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is false"));
 	}
-
-
 }
 
-void AEnemyBase::DetectAroundATPObject()
-{
 
-}
 
 TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 {
@@ -530,6 +524,7 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	if (!IsNpcDead)
 	{
+		DetectOtherObject();
 		CheckDistance();
 	}
 }
