@@ -389,18 +389,37 @@ void AEnemyBase::BeginPlay()
 	InitEnemyController();
 
 	Init();
+
+	/*AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
+	if (MyController)
+	{
+		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			if (is_long_range_npc)
+			{
+			UE_LOG(LogTemp, Warning, TEXT("is_long_range_npc called!"));
+				if (aggresive)BlackboardComp->SetValueAsFloat("StopDistance", 500.0f);
+				else BlackboardComp->SetValueAsFloat("StopDistance", 300.0f);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Short called!"));
+				BlackboardComp->SetValueAsFloat("StopDistance", 50.0f);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Blackboard Component is null!"));
+		}
+	}*/
+
 }
 
 void AEnemyBase::Tick(float DeltaTime)
 {
 	if (!IsNpcDead)
 	{
-		/*if (!CurrentVelocity.IsZero())
-		{
-			FRotator NewRotation = CurrentVelocity.ToOrientationRotator();
-			SetActorRotation(NewRotation);
-		}*/
-
 		if (aggresive)
 		{
 			DetectOtherObject();
