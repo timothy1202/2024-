@@ -107,7 +107,7 @@ void AEnemyBase::Init()
 		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
 		if (BlackboardComp)
 		{
-			BlackboardComp->SetValueAsBool("Is Aggressive", true);
+			BlackboardComp->SetValueAsBool("IsAggressive", true);
 		}
 	}
 
@@ -116,11 +116,11 @@ void AEnemyBase::Init()
 void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
 	UPrimitiveComponent* OtherComp,int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("beginOverlap called!"));
 	if (!aggresive)
 	{
 		if (OtherComp->ComponentHasTag("Player"))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("kkkkkd!"));
 			ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 			SetAttackTarget(PlayerCharacter);
 		}
@@ -142,16 +142,30 @@ void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, A
 
 void AEnemyBase::SetAttackTarget(AActor* AttackTarget)
 {
+	if (AttackTarget)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *AttackTarget->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackTarget is null"));
+	}
+
 	HighestATPTarget = AttackTarget;
 	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
-	UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
+	UBlackboardComponent* BlackboardComp = MyController ? MyController->GetBlackboardComponent() : nullptr;
 
-	if (IsValid(HighestATPTarget))
-		BlackboardComp->SetValueAsObject("Attack Target", HighestATPTarget);
+	if (IsValid(HighestATPTarget) && BlackboardComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BlackboardComp is null"));
+		BlackboardComp->SetValueAsObject("AttackTarget", AttackTarget);
+	}
 	else
-		BlackboardComp->SetValueAsObject("Attack Target", nullptr);
-
+	{
+		BlackboardComp->SetValueAsObject("AttackTarget", nullptr);
+	}
 }
+
 
 void AEnemyBase::DetectOtherObject()
 {
@@ -381,6 +395,12 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	if (!IsNpcDead)
 	{
+		/*if (!CurrentVelocity.IsZero())
+		{
+			FRotator NewRotation = CurrentVelocity.ToOrientationRotator();
+			SetActorRotation(NewRotation);
+		}*/
+
 		if (aggresive)
 		{
 			DetectOtherObject();
