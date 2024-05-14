@@ -135,24 +135,24 @@ void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
 				TPair<AActor*, int32> player_result = GetPlayerATP();
 
-				UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
+				//UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
 				if (building_result.Key != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
+					//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
 				}
 
-				UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
+				//UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
 				if (player_result.Key != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
+				//	UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
 				}
 
 				if (building_result.Value > player_result.Value)
@@ -186,24 +186,24 @@ void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, A
 				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
 				TPair<AActor*, int32> player_result = GetPlayerATP();
 
-				UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
+				//UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
 				if (building_result.Key != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
+					//(LogTemp, Warning, TEXT("Building Result Key: NULL"));
 				}
 
-				UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
+				//UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
 				if (player_result.Key != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
+					//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
 				}
 
 				if (building_result.Value > player_result.Value)
@@ -277,6 +277,7 @@ void AEnemyBase::DetectOtherObject()
 
 	if (bHit)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is true"));
 		if (OutHit.GetActor()->Tags.Contains(FName("EnemyDetect")) && OutHit.GetActor()!=HighestATPTarget)
 		{
 			detect_other_objects = true;
@@ -286,6 +287,7 @@ void AEnemyBase::DetectOtherObject()
 	else
 	{
 		detect_other_objects = false;
+		UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is false"));
 	}
 
 
