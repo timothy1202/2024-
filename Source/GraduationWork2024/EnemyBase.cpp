@@ -155,15 +155,22 @@ void AEnemyBase::SetAttackTarget(AActor* AttackTarget)
 	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
 	UBlackboardComponent* BlackboardComp = MyController ? MyController->GetBlackboardComponent() : nullptr;
 
-	if (IsValid(HighestATPTarget) && BlackboardComp)
+	if (BlackboardComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BlackboardComp is null"));
-		BlackboardComp->SetValueAsObject("AttackTarget", AttackTarget);
+		if (IsValid(HighestATPTarget))
+		{
+			BlackboardComp->SetValueAsObject("AttackTarget", AttackTarget);
+		}
+		else
+		{
+			BlackboardComp->SetValueAsObject("AttackTarget", nullptr);
+		}
 	}
 	else
 	{
-		BlackboardComp->SetValueAsObject("AttackTarget", nullptr);
+		UE_LOG(LogTemp, Warning, TEXT("BlackboardComp is null"));
 	}
+
 }
 
 
@@ -390,7 +397,7 @@ void AEnemyBase::BeginPlay()
 
 	Init();
 
-	/*AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
+	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
 	if (MyController)
 	{
 		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
@@ -405,14 +412,14 @@ void AEnemyBase::BeginPlay()
 			else
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Short called!"));
-				BlackboardComp->SetValueAsFloat("StopDistance", 50.0f);
+				BlackboardComp->SetValueAsFloat("StopDistance", 70.0f);
 			}
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Blackboard Component is null!"));
 		}
-	}*/
+	}
 
 }
 
