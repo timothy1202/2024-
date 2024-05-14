@@ -34,7 +34,7 @@ void AAIC_EnemyBase::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime); 
 
-   /* if (IsValid(myPawn))
+   if (IsValid(myPawn))
     {
         if (myPawn->HighestATPTarget != highest_ATP_target)
         {
@@ -50,7 +50,12 @@ void AAIC_EnemyBase::Tick(float DeltaTime)
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("myPawn is not valid"));
-    }*/
+    }
+}
+
+void AAIC_EnemyBase::SetMyPawn(AEnemyBase* my_Pawn)
+{
+	myPawn=my_Pawn;
 }
 
 

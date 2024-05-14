@@ -109,6 +109,8 @@ void AEnemyBase::Init()
 		{
 			BlackboardComp->SetValueAsBool("IsAggressive", true);
 		}
+
+		EnemyController->SetMyPawn(this);
 	}
 
 }
@@ -228,12 +230,16 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		if (Actor->ActorHasTag(TEXT("Player")))
+		TArray<UActorComponent*> PlayerTaggedComponents = 
+			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("Player"));
+
+		if (PlayerTaggedComponents.Num() > 0)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor: %s"), *Actor->GetName());
+			//UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'Player' tagged component: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
 	}
+
 
 	int Value = TaggedActors.Num();
 
@@ -276,12 +282,27 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		if (Actor->ActorHasTag(TEXT("FriendlyBuilding")))
+		TArray<UActorComponent*> PlayerTaggedComponents =
+			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("FriendlyBuilding"));
+
+		if (PlayerTaggedComponents.Num() > 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor: %s"), *Actor->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'FriendlyBuilding' tagged component: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
 	}
+
+	//RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+
+	//for (AActor* Actor : OverlappingActors)
+	//{
+
+	//	if (Actor->ActorHasTag(TEXT("Player")))
+	//	{
+	//		//UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor: %s"), *Actor->GetName());
+	//		TaggedActors.Add(Actor);
+	//	}
+	//}
 
 	int Value = TaggedActors.Num();
 
@@ -437,25 +458,24 @@ void AEnemyBase::Tick(float DeltaTime)
 				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
 				TPair<AActor*, int32> player_result = GetPlayerATP();
 
-				// 여기서 building_result와 player_result 관련 정보를 로그로 출력
-				UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
+				//UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
 				if (building_result.Key != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
+					//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
 				}
 
-				UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
+				//UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
 				if (player_result.Key != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
+					//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
 				}
 
 				if (building_result.Value > player_result.Value)
