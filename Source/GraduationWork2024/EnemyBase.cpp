@@ -406,8 +406,8 @@ void AEnemyBase::BeginPlay()
 			if (is_long_range_npc)
 			{
 			UE_LOG(LogTemp, Warning, TEXT("is_long_range_npc called!"));
-				if (aggresive)BlackboardComp->SetValueAsFloat("StopDistance", 500.0f);
-				else BlackboardComp->SetValueAsFloat("StopDistance", 300.0f);
+				if (aggresive)BlackboardComp->SetValueAsFloat("StopDistance", 800.0f);
+				else BlackboardComp->SetValueAsFloat("StopDistance", 600.0f);
 			}
 			else
 			{
