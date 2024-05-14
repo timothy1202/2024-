@@ -8,6 +8,8 @@
 #include "AIController.h"
 #include "AIC_EnemyBase.generated.h"
 
+
+class AEnemyBase;
 /**
  * 
  */
@@ -25,6 +27,16 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable, Category = "Behavior Tree")
 	void ExecuteBT(UBehaviorTree* BT);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void Tick(float DeltaTime) override;
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	AEnemyBase* myPawn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	AActor* highest_ATP_target;
 
 	USkeletalMeshComponent* GetMeshComponent() const;
 };

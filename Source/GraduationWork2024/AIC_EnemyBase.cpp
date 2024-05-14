@@ -5,6 +5,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/CrowdFollowingComponent.h"
+#include "EnemyBase.h"
 
 AAIC_EnemyBase::AAIC_EnemyBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
@@ -28,6 +29,30 @@ void AAIC_EnemyBase::ExecuteBT(UBehaviorTree* const BT)
 		RunBehaviorTree(BT);
 	}
 }
+
+void AAIC_EnemyBase::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime); 
+
+   /* if (IsValid(myPawn))
+    {
+        if (myPawn->HighestATPTarget != highest_ATP_target)
+        {
+            highest_ATP_target = myPawn->HighestATPTarget;
+
+            UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+            if (BlackboardComp)
+            {
+                BlackboardComp->SetValueAsObject("AttackTarget", highest_ATP_target);
+            }
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("myPawn is not valid"));
+    }*/
+}
+
 
 USkeletalMeshComponent* AAIC_EnemyBase::GetMeshComponent() const
 {
