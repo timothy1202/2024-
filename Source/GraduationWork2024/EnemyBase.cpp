@@ -230,6 +230,7 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 	{
 		if (Actor->ActorHasTag(TEXT("Player")))
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
 	}
@@ -259,7 +260,7 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 		break;
 	}
 
-	return TPair<AActor*, int32>();
+	return TPair<AActor*, int32>(HighestTarget, ATP);
 }
 
 TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
@@ -277,6 +278,7 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 	{
 		if (Actor->ActorHasTag(TEXT("FriendlyBuilding")))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
 	}
@@ -321,7 +323,7 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 		}
 	}
 
-	return TPair<AActor*, int32>();
+	return TPair<AActor*, int32>(HighestTarget, ATP);
 }
 
 void AEnemyBase::CheckDistance()
@@ -434,6 +436,28 @@ void AEnemyBase::Tick(float DeltaTime)
 			{
 				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
 				TPair<AActor*, int32> player_result = GetPlayerATP();
+
+				// 여기서 building_result와 player_result 관련 정보를 로그로 출력
+				UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
+				if (building_result.Key != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
+				}
+
+				UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
+				if (player_result.Key != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
+				}
+
 				if (building_result.Value > player_result.Value)
 					HighestATPTarget = building_result.Key;
 				else
@@ -444,6 +468,7 @@ void AEnemyBase::Tick(float DeltaTime)
 		CheckDistance();
 	}
 }
+
 
 void AEnemyBase::FirstThunderAttacked()
 {
