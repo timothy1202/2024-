@@ -27,28 +27,28 @@ public:
 	AEnemyBase();
 
 private:
-	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCapsuleComponent> CapsuleComponent;
 
-	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USkeletalMeshComponent> Mesh;
 
-	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UFloatingPawnMovement> PawnMovement;
 
-	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UArrowComponent> ArrowComponent;
 
-	UPROPERTY(Category = PawnCollision, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = PawnCollision, EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USphereComponent> RecognitionBoundary;
 
-	UPROPERTY(Category = PawnCollision, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = PawnCollision, EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USphereComponent> PlayerAimCollision;
 
-	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UArrowComponent> ObjectDetectArrow;
 
-	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UWidgetComponent> HealthWidget;
 
 //변수용 private
@@ -141,11 +141,6 @@ private:
 	UBehaviorTree* MyBehaviorTree;
 
 //침략 관련
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	bool aggresive;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	AActor* HighestATPTarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool detect_other_objects;
@@ -189,7 +184,26 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float ThunderScale;
 
+//공격 관련
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool is_long_range_npc;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool is_page_two;
+
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	AActor* HighestATPTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool is_playing_skill;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = "true"))
+	bool aggresive;
+
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UFloatingPawnMovement* GetPawnMovement() const { return PawnMovement; }
 
@@ -199,13 +213,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Init();
 
-	void Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	void Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
 	UFUNCTION(BlueprintCallable)
 	void SetAttackTarget(AActor * AttackTarget);
 
+	UFUNCTION()
 	void DetectOtherObject();
 	
 	TPair<AActor*, int32> GetPlayerATP();
@@ -216,7 +234,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateDamagedHealthBar(float damage);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void NpcDead();
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -242,10 +260,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FindFirstThunderTarget();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnFirstThunder(AActor * tunder_target);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnSecondThunder(AActor* tunder_target);
 
 protected:
