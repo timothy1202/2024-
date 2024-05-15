@@ -127,42 +127,6 @@ void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 			SetAttackTarget(PlayerCharacter);
 		}
 	}
-	else
-	{
-		//if (!detect_other_objects)
-		//{
-		//	if (OtherComp->ComponentHasTag("Player")|| OtherComp->ComponentHasTag("FriendlyBuilding"))
-		//	{
-		//		TPair<AActor*, int32> building_result = GetHighestBuildingATP();
-		//		TPair<AActor*, int32> player_result = GetPlayerATP();
-
-		//		//UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
-		//		if (building_result.Key != nullptr)
-		//		{
-		//			//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
-		//		}
-		//		else
-		//		{
-		//			//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
-		//		}
-
-		//		//UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
-		//		if (player_result.Key != nullptr)
-		//		{
-		//			//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
-		//		}
-		//		else
-		//		{
-		//		//	UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
-		//		}
-
-		//		if (building_result.Value > player_result.Value)
-		//			HighestATPTarget = building_result.Key;
-		//		else
-		//			HighestATPTarget = player_result.Key;
-		//	}
-		//}
-	}
 }
 
 void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
@@ -177,42 +141,6 @@ void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, A
 				SetAttackTarget(nullptr);
 			}
 		}
-	}
-	else
-	{
-		//if (!detect_other_objects)
-		//{
-		//	if (OtherComp->ComponentHasTag("Player") || OtherComp->ComponentHasTag("FriendlyBuilding"))
-		//	{
-		//		TPair<AActor*, int32> building_result = GetHighestBuildingATP();
-		//		TPair<AActor*, int32> player_result = GetPlayerATP();
-
-		//		//UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
-		//		if (building_result.Key != nullptr)
-		//		{
-		//			//UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
-		//		}
-		//		else
-		//		{
-		//			//(LogTemp, Warning, TEXT("Building Result Key: NULL"));
-		//		}
-
-		//		//UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
-		//		if (player_result.Key != nullptr)
-		//		{
-		//			//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
-		//		}
-		//		else
-		//		{
-		//			//UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
-		//		}
-
-		//		if (building_result.Value > player_result.Value)
-		//			HighestATPTarget = building_result.Key;
-		//		else
-		//			HighestATPTarget = player_result.Key;
-		//	}
-		//}
 	}
 }
 
