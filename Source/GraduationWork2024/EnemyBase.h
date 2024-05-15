@@ -219,8 +219,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetAttackTarget(AActor * AttackTarget);
 
+	UFUNCTION()
 	void DetectOtherObject();
-
 	
 	TPair<AActor*, int32> GetPlayerATP();
 	TPair<AActor*, int32> GetHighestBuildingATP();
@@ -232,9 +232,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void NpcDead();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void NpcDeadchild();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DropItem();
@@ -269,7 +266,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UFUNCTION(BlueprintCallable)
 	virtual void Tick(float DeltaTime) override;
 
 };

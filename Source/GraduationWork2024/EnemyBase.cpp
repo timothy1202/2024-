@@ -20,6 +20,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/PrimitiveComponent.h"
 #include "Animation/AnimInstance.h"
+#include "DrawDebugHelpers.h"
 
 
 AEnemyBase::AEnemyBase()
@@ -257,37 +258,32 @@ void AEnemyBase::DetectOtherObject()
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this); 
 
-	ECollisionChannel TraceChannel = ECC_Visibility;
-	/*FCollisionObjectQueryParams ObjectQueryParams;
-	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
-	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel4);*/
+	//ECollisionChannel TraceChannel = ECC_Visibility;
 
 	FHitResult OutHit; 
 
-	bool bIsHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, TraceChannel, CollisionParams);
-#if WITH_EDITOR
-
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 1);
-#endif
+	GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECollisionChannel::ECC_Visibility);
 
 
-	if (bIsHit)
+	if (OutHit.bBlockingHit)
 	{
-			UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is true"));
-			detect_other_objects = true;
-			HighestATPTarget = OutHit.GetActor();
-		UPrimitiveComponent* HitComponent = OutHit.GetComponent();
-		if (HitComponent != nullptr && HitComponent->ComponentHasTag(FName("EnemyDetect")) /* && OutHit.GetActor() != HighestATPTarget*/)
-		{
-		}
-		else UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is false2222"));
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, 0, 2);
+		UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is true"));
+		//	detect_other_objects = true;
+		//	HighestATPTarget = OutHit.GetActor();
+		//UPrimitiveComponent* HitComponent = OutHit.GetComponent();
+		//if (HitComponent != nullptr && HitComponent->ComponentHasTag(FName("EnemyDetect")) /* && OutHit.GetActor() != HighestATPTarget*/)
+		//{
+		//}
+		//else UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is false2222"));
 	}
 
 	else
 	{
-		detect_other_objects = false;
+		//detect_other_objects = false;
 		UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is false"));
 	}
+
 }
 
 
@@ -522,6 +518,8 @@ void AEnemyBase::BeginPlay()
 
 void AEnemyBase::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+
 	if (!IsNpcDead)
 	{
 		DetectOtherObject();
