@@ -44,6 +44,7 @@ void AAIC_EnemyBase::Tick(float DeltaTime)
             if (BlackboardComp)
             {
                 BlackboardComp->SetValueAsObject("AttackTarget", highest_ATP_target);
+				StopMovement();
             }
         }
     }

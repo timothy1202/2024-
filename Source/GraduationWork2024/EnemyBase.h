@@ -190,8 +190,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	bool is_playing_skill;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool is_long_range_npc;
@@ -199,6 +197,9 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	AActor* HighestATPTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool is_playing_skill;
 
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UFloatingPawnMovement* GetPawnMovement() const { return PawnMovement; }
