@@ -498,6 +498,7 @@ void AEnemyBase::Tick(float DeltaTime)
 					HighestATPTarget = player_result.Key;
 		}
 		CheckDistance();
+
 	}
 }
 
