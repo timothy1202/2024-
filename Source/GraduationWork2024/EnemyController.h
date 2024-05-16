@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ST_Enemy.h"
+#include "EnemySpawnVolume.h"
 #include "EnemyController.generated.h"
 
 class AEnemyBase;
@@ -15,7 +17,16 @@ class GRADUATIONWORK2024_API AEnemyController : public AActor
 
 private:
 	TArray<AEnemyBase*> Enemys;
+
+	UPROPERTY(EditInstanceOnly, Category = "Enemy", meta = (AllowPrivateAccess = "true"))
+	TArray<AEnemySpawnVolume*> EnemySpawnSpots;
 	
+	UPROPERTY(EditInstanceOnly, Category = "Enemy", meta = (AllowPrivateAccess = "true"))
+	FEnemyWave EnemyArmyMaxSpawn;
+
+	UPROPERTY(EditInstanceOnly, Category = "Enemy", meta = (AllowPrivateAccess = "true"))
+	TMap<FName, FArmyStore> EnemyArmyStorage;
+
 public:	
 	// Sets default values for this actor's properties
 	AEnemyController();
@@ -27,6 +38,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void InitializeEnemyStorage();
+
+	void SpawnEnemys();
+
+	void StartWave(int WaveNum);
 
 	void CheckRendered(AEnemyBase* Enemy);
 
