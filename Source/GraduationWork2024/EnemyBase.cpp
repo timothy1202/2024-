@@ -98,6 +98,7 @@ void AEnemyBase::Init()
 	AAIC_EnemyBase* EnemyController = Cast<AAIC_EnemyBase>(MyController);
 	if (EnemyController)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ExecuteBT"));
 		EnemyController->ExecuteBT(MyBehaviorTree);
 	}
 
@@ -114,6 +115,28 @@ void AEnemyBase::Init()
 		EnemyController->SetMyPawn(this);
 	}
 
+	if (MyController)
+	{
+		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			if (is_long_range_npc)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("is_long_range_npc called!"));
+				if (aggresive)BlackboardComp->SetValueAsFloat("StopDistance", 800.0f);
+				else BlackboardComp->SetValueAsFloat("StopDistance", 600.0f);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Short called!"));
+				BlackboardComp->SetValueAsFloat("StopDistance", 70.0f);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Blackboard Component is null!"));
+		}
+	}
 }
 
 void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
@@ -438,32 +461,6 @@ void AEnemyBase::BeginPlay()
 	RecognitionBoundary->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapEnd);
 
 	InitEnemyController();
-
-	Init();
-
-	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
-	if (MyController)
-	{
-		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
-		if (BlackboardComp)
-		{
-			if (is_long_range_npc)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("is_long_range_npc called!"));
-				if (aggresive)BlackboardComp->SetValueAsFloat("StopDistance", 800.0f);
-				else BlackboardComp->SetValueAsFloat("StopDistance", 600.0f);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Short called!"));
-				BlackboardComp->SetValueAsFloat("StopDistance", 70.0f);
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Blackboard Component is null!"));
-		}
-	}
 
 }
 
