@@ -30,6 +30,8 @@ void AEnemyController::BeginPlay()
 		Enemys.AddUnique(enemy);
 	}
 
+	InitializeEnemyStorage();
+	SpawnEnemys();
 }
 
 // Called every frame
@@ -40,6 +42,14 @@ void AEnemyController::Tick(float DeltaTime)
 	for (AEnemyBase* enemy : Enemys)
 	{
 		CheckRendered(enemy);
+	}
+}
+
+void AEnemyController::InitializeEnemyStorage()
+{
+	for (AEnemySpawnVolume* Spot : EnemySpawnSpots)
+	{
+		EnemyArmyStorage.Add(Spot->GetEnemyKind(), FArmyStore());
 	}
 }
 
@@ -72,6 +82,16 @@ void AEnemyController::CheckRendered(AEnemyBase* Enemy)
 			}
 		}
 	}
+}
+
+void AEnemyController::SpawnEnemys()
+{
+
+}
+
+void AEnemyController::StartWave(int WaveNum)
+{
+
 }
 
 void AEnemyController::RegisterRenderTarget(AEnemyBase* Enemy)
