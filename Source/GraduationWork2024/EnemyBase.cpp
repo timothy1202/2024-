@@ -253,12 +253,10 @@ void AEnemyBase::DetectOtherObject()
 
 }
 
-
-
 TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 {
-	AActor* HighestTarget;
-	int32 ATP=0;
+	AActor* HighestTarget = nullptr;
+	int32 ATP = 0;
 
 	TArray<AActor*> OverlappingActors;
 	TArray<AActor*> TaggedActors;
@@ -267,7 +265,7 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		TArray<UActorComponent*> PlayerTaggedComponents = 
+		TArray<UActorComponent*> PlayerTaggedComponents =
 			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("Player"));
 
 		if (PlayerTaggedComponents.Num() > 0)
@@ -277,43 +275,83 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 		}
 	}
 
-	int Value = 0;
-	if (TaggedActors.Num() >= 0)
-	{
-		Value = TaggedActors.Num();
-	}
-
-	switch (Value)
-	{
-	case 0:
-	{
-		HighestTarget = NULL;
-		ATP = 0;
-		break;
-	}
-	case 1:
+	if (TaggedActors.Num() == 1)
 	{
 		ACharacter* PlayerCharacter = Cast<ACharacter>(TaggedActors[0]);
-
 		if (PlayerCharacter)
 		{
 			ATP = 110;
 			HighestTarget = PlayerCharacter;
 		}
-		break;
 	}
-	default:
-		break;
+	else if (TaggedActors.Num() == 0)
+	{
+		HighestTarget = nullptr;
+		ATP = 0;
 	}
 
 	return TPair<AActor*, int32>(HighestTarget, ATP);
 }
 
+
+//TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
+//{
+//	AActor* HighestTarget;
+//	int32 ATP=0;
+//
+//	TArray<AActor*> OverlappingActors;
+//	TArray<AActor*> TaggedActors;
+//
+//	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+//
+//	for (AActor* Actor : OverlappingActors)
+//	{
+//		TArray<UActorComponent*> PlayerTaggedComponents = 
+//			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("Player"));
+//
+//		if (PlayerTaggedComponents.Num() > 0)
+//		{
+//			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'Player' tagged component: %s"), *Actor->GetName());
+//			TaggedActors.Add(Actor);
+//		}
+//	}
+//
+//	int Value = 0;
+//	if (TaggedActors.Num() >= 0)
+//	{
+//		Value = TaggedActors.Num();
+//	}
+//
+//	switch (Value)
+//	{
+//	case 0:
+//	{
+//		HighestTarget = NULL;
+//		ATP = 0;
+//		break;
+//	}
+//	case 1:
+//	{
+//		ACharacter* PlayerCharacter = Cast<ACharacter>(TaggedActors[0]);
+//
+//		if (PlayerCharacter)
+//		{
+//			ATP = 110;
+//			HighestTarget = PlayerCharacter;
+//		}
+//		break;
+//	}
+//	default:
+//		break;
+//	}
+//
+//	return TPair<AActor*, int32>(HighestTarget, ATP);
+//}
+
 TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 {
-	AActor* HighestTarget;
-	int32 ATP;
-	TArray<int32> AtpArray;
+	AActor* HighestTarget = nullptr;
+	int32 HighestATP = 0;
 
 	TArray<AActor*> OverlappingActors;
 	TArray<AActor*> TaggedActors;
@@ -327,69 +365,122 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 
 		if (PlayerTaggedComponents.Num() > 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'FriendlyBuilding' tagged component: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
-		else UE_LOG(LogTemp, Warning, TEXT("PlayerTaggedComponents.Num() is null"));
-	}
-
-	int Value = 0;
-	if (TaggedActors.Num() >= 0)
-	{
-		Value = TaggedActors.Num();
-	}
-
-	switch (Value)
-	{
-		case 0:
+		else
 		{
-			HighestTarget = NULL;
-			ATP = 0;
-			break;
+			UE_LOG(LogTemp, Warning, TEXT("Actor does not have FriendlyBuilding tag"));
 		}
-		case 1:
+	}
+
+	for (AActor* Actor : TaggedActors)
+	{
+		if (Actor->Implements<UATPInterface>())
 		{
-			AActor* SomeActor = TaggedActors[0];
-			if (SomeActor->GetClass()->ImplementsInterface(UATPInterface::StaticClass()))
+			IATPInterface* myInterface = Cast<IATPInterface>(Actor);
+			if (myInterface)
 			{
-				int32 ActorATP = IATPInterface::Execute_GetATP(SomeActor);
-				ATP = ActorATP;
-				HighestTarget = SomeActor;
+				int32 CurrentATP = myInterface->GetATP();
+				if (CurrentATP > HighestATP)
+				{
+					HighestATP = CurrentATP;
+					HighestTarget = Actor;
+				}
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
+				UE_LOG(LogTemp, Warning, TEXT("Failed to cast to IATPInterface"));
 			}
-
-
-			break;
 		}
-		default:
+		else
 		{
-			for (int i = 0; i < TaggedActors.Num(); i++)
-			{
-				AActor* SomeActor = TaggedActors[i];
-				if (SomeActor->Implements<UATPInterface>())
-				{
-					IATPInterface* myInterface = Cast<IATPInterface>(SomeActor);
-					if (myInterface)
-					{
-						AtpArray.Add(myInterface->GetATP());
-					}
-				}
-				else UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
-			}
-
-
-			int32 IndexOfMaxValue;
-			UKismetMathLibrary::MaxOfIntArray(AtpArray, IndexOfMaxValue, ATP);
-			HighestTarget = TaggedActors[IndexOfMaxValue];
-			break;
+			UE_LOG(LogTemp, Warning, TEXT("Actor does not implement ATPInterface"));
 		}
 	}
 
-	return TPair<AActor*, int32>(HighestTarget, ATP);
+	return TPair<AActor*, int32>(HighestTarget, HighestATP);
 }
+
+//TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
+//{
+//	AActor* HighestTarget=nullptr;
+//	int32 ATP=0;
+//	TArray<int32> AtpArray;
+//
+//	TArray<AActor*> OverlappingActors;
+//	TArray<AActor*> TaggedActors;
+//
+//	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+//
+//	for (AActor* Actor : OverlappingActors)
+//	{
+//		TArray<UActorComponent*> PlayerTaggedComponents =
+//			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("FriendlyBuilding"));
+//
+//		if (PlayerTaggedComponents.Num() > 0)
+//		{
+//			TaggedActors.Add(Actor);
+//		}
+//		else UE_LOG(LogTemp, Warning, TEXT("PlayerTaggedComponents.Num() is null"));
+//	}
+//
+//	int Value = TaggedActors.Num();
+//
+//
+//	switch (Value)
+//	{
+//		case 0:
+//		{
+//			HighestTarget = nullptr;
+//			ATP = 0;
+//			break;
+//		}
+//		case 1:
+//		{
+//			AActor* SomeActor = TaggedActors[0];
+//			if (SomeActor->Implements<UATPInterface>())
+//			{
+//				IATPInterface* myInterface = Cast<IATPInterface>(SomeActor);
+//				if (myInterface)
+//				{
+//					ATP = myInterface->GetATP();
+//					HighestTarget = SomeActor;
+//				}
+//			}
+//			else
+//			{
+//				UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
+//			}
+//
+//
+//			break;
+//		}
+//		default:
+//		{
+//			for (int i = 0; i < TaggedActors.Num(); i++)
+//			{
+//				AActor* SomeActor = TaggedActors[i];
+//				if (SomeActor->Implements<UATPInterface>())
+//				{
+//					IATPInterface* myInterface = Cast<IATPInterface>(SomeActor);
+//					if (myInterface)
+//					{
+//						AtpArray.Add(myInterface->GetATP());
+//					}
+//				}
+//				else UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
+//			}
+//
+//
+//			int32 IndexOfMaxValue=0;
+//			UKismetMathLibrary::MaxOfIntArray(AtpArray, IndexOfMaxValue, ATP);
+//			HighestTarget = TaggedActors[IndexOfMaxValue];
+//			break;
+//		}
+//	}
+//
+//	return TPair<AActor*, int32>(HighestTarget, ATP);
+//}
 
 void AEnemyBase::CheckDistance()
 {
@@ -472,13 +563,15 @@ void AEnemyBase::Tick(float DeltaTime)
 	{
 		if (aggresive)
 		{
-			DetectOtherObject();
+			//DetectOtherObject();
+			detect_other_objects = false;
 			if (!detect_other_objects)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Detect Other is false"));
 					TPair<AActor*, int32> building_result = GetHighestBuildingATP();
 					TPair<AActor*, int32> player_result = GetPlayerATP();
 
-					UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
+					/*UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
 					if (building_result.Key != nullptr)
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
@@ -496,13 +589,22 @@ void AEnemyBase::Tick(float DeltaTime)
 					else
 					{
 							UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
-					}
+					}*/
 
 					if (building_result.Value > player_result.Value)
 						HighestATPTarget = building_result.Key;
 					else
 						HighestATPTarget = player_result.Key;
+
 			}
+					if (HighestATPTarget != nullptr)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Highest ATP Target222: %s"), *HighestATPTarget->GetName());
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Highest ATP Target: NULL"));
+					}
 		}
 		CheckDistance();
 	}

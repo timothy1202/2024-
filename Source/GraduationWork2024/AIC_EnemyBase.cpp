@@ -37,6 +37,7 @@ void AAIC_EnemyBase::Tick(float DeltaTime)
 
    if (IsValid(myPawn))
     {
+	   UE_LOG(LogTemp, Warning, TEXT("myPawn is valid"));
         if (myPawn->HighestATPTarget != highest_ATP_target)
         {
             highest_ATP_target = myPawn->HighestATPTarget;
