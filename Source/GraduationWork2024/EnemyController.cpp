@@ -11,7 +11,7 @@
 // Sets default values
 AEnemyController::AEnemyController()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
@@ -23,7 +23,7 @@ void AEnemyController::BeginPlay()
 
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemyBase::StaticClass(), OutActors);
-	
+
 	for (AActor* actor : OutActors)
 	{
 		AEnemyBase* enemy = Cast<AEnemyBase>(actor);
@@ -118,28 +118,25 @@ void AEnemyController::CheckRendered(AEnemyBase* Enemy)
 		USkeletalMeshComponent* EnemyMesh = Enemy->GetMesh();
 		UFloatingPawnMovement* EnemyMovement = Enemy->GetPawnMovement();
 
-		if (Enemy->IsActive())
+		APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		FVector2D ScreenLocation = FVector2D::Zero();
+		controller->ProjectWorldLocationToScreen(Enemy->GetActorLocation(), ScreenLocation, false);
+
+		FVector2D ScreenSize = FVector2D::Zero();
+		GEngine->GameViewport->GetViewportSize(ScreenSize);
+		ScreenSize += FVector2D(250.0f, 250.0f);
+
+		if (EnemyMesh && EnemyMovement)
 		{
-			APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-			FVector2D ScreenLocation = FVector2D::Zero();
-			controller->ProjectWorldLocationToScreen(Enemy->GetActorLocation(), ScreenLocation, false);
-
-			FVector2D ScreenSize = FVector2D::Zero();
-			GEngine->GameViewport->GetViewportSize(ScreenSize);
-			ScreenSize += FVector2D(250.0f, 250.0f);
-
-			if (EnemyMesh && EnemyMovement)
+			if (ScreenLocation.X > -250.0f && ScreenLocation.Y > -250.0f && ScreenLocation.X < ScreenSize.X && ScreenLocation.Y < ScreenSize.Y)
 			{
-				if (ScreenLocation.X > -250.0f && ScreenLocation.Y > -250.0f && ScreenLocation.X < ScreenSize.X && ScreenLocation.Y < ScreenSize.Y)
-				{
-					EnemyMesh->SetComponentTickInterval(0.0f);
-					EnemyMovement->SetComponentTickInterval(0.0f);
-				}
-				else
-				{
-					Enemy->GetMesh()->SetComponentTickInterval(0.1f);
-					EnemyMovement->SetComponentTickInterval(0.5f);
-				}
+				EnemyMesh->SetComponentTickInterval(0.0f);
+				EnemyMovement->SetComponentTickInterval(0.0f);
+			}
+			else
+			{
+				Enemy->GetMesh()->SetComponentTickInterval(0.1f);
+				EnemyMovement->SetComponentTickInterval(0.5f);
 			}
 		}
 	}
