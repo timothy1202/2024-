@@ -428,6 +428,29 @@ void AEnemyBase::DestroyActor_Implementation()
 	AActor::Destroy();
 }
 
+void AEnemyBase::Deactivate()
+{
+	Super::Deactivate();
+}
+
+void AEnemyBase::SetActive(bool IsActive)
+{
+	Super::SetActive(IsActive);
+	/*Mesh->SetComponentTickEnabled(IsActive);
+	PawnMovement->SetComponentTickEnabled(IsActive);
+	CapsuleComponent->SetComponentTickEnabled(IsActive);
+	RecognitionBoundary->SetComponentTickEnabled(IsActive);
+	PlayerAimCollision->SetComponentTickEnabled(IsActive);*/
+
+	TArray<UActorComponent*> Comps;
+	GetComponents<UActorComponent>(Comps);
+	
+	for (UActorComponent* component : Comps)
+	{
+		component->SetComponentTickEnabled(IsActive);
+	}
+}
+
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();

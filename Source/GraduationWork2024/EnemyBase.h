@@ -266,6 +266,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnSecondThunder(AActor* tunder_target);
 
+	virtual void Deactivate() override;
+
+	virtual void SetActive(bool IsActive) override;
+
 protected:
 	virtual void BeginPlay() override;
 

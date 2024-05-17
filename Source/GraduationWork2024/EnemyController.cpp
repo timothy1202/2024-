@@ -31,7 +31,7 @@ void AEnemyController::BeginPlay()
 	}
 
 	InitializeEnemyStorage();
-	SpawnEnemys();
+	SpawnArmy();
 }
 
 // Called every frame
@@ -53,45 +53,96 @@ void AEnemyController::InitializeEnemyStorage()
 	}
 }
 
-void AEnemyController::CheckRendered(AEnemyBase* Enemy)
+void AEnemyController::SpawnByTier(const FEnemyType& EnemyInfo, const FName& EnemyKind, int Tier)
 {
-	if (Enemy)
+	UWorld* const World = GetWorld();
+
+	if (World != nullptr)
 	{
-		APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		FVector2D ScreenLocation = FVector2D::Zero();
-		controller->ProjectWorldLocationToScreen(Enemy->GetActorLocation(), ScreenLocation, false);
-
-		FVector2D ScreenSize = FVector2D::Zero();
-		GEngine->GameViewport->GetViewportSize(ScreenSize);
-		ScreenSize += FVector2D(250.0f, 250.0f);
-
-		USkeletalMeshComponent* EnemyMesh = Enemy->GetMesh();
-		UFloatingPawnMovement* EnemyMovement = Enemy->GetPawnMovement();
-
-		if (EnemyMesh && EnemyMovement)
+		if (EnemyInfo.EnemyType != nullptr)
 		{
-			if (ScreenLocation.X > -250.0f && ScreenLocation.Y > -250.0f && ScreenLocation.X < ScreenSize.X && ScreenLocation.Y < ScreenSize.Y)
+			for (int i = 0; i < EnemyInfo.EnemySize; i++)
 			{
-				EnemyMesh->SetComponentTickInterval(0.0f);
-				EnemyMovement->SetComponentTickInterval(0.0f);
-			}
-			else
-			{
-				Enemy->GetMesh()->SetComponentTickInterval(0.1f);
-				EnemyMovement->SetComponentTickInterval(0.5f);
+				FTransform SpawnTransform(FRotator().ZeroRotator, FVector().ZeroVector);
+				AEnemyBase* Enemy = World->SpawnActorDeferred<AEnemyBase>(EnemyInfo.EnemyType, SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+				if (Enemy != nullptr)
+				{
+					Enemy->aggresive = true;
+					Enemy->FinishSpawning(SpawnTransform);
+					Enemy->SetActive(false);
+					Enemy->SetPoolIndex(i);
+					//
+					switch (Tier)
+					{
+					case 1:
+						EnemyArmyStorage[EnemyKind].FirstTierStrage.Enemys.Add(Enemy);
+						break;
+					case 2:
+						EnemyArmyStorage[EnemyKind].SecondTierStrage.Enemys.Add(Enemy);
+						break;
+					case 3:
+						EnemyArmyStorage[EnemyKind].ThirdTierStrage.Enemys.Add(Enemy);
+					}
+				}
 			}
 		}
 	}
 }
 
-void AEnemyController::SpawnEnemys()
+void AEnemyController::SpawnEnemy(const FST_Enemy& EnemyInfo)
 {
+	if (EnemyArmyStorage.Find(EnemyInfo.EnemyKind))
+	{
+		SpawnByTier(EnemyInfo.FirstTierEnemy, EnemyInfo.EnemyKind, 1);
+		SpawnByTier(EnemyInfo.SecondTierEnemy, EnemyInfo.EnemyKind, 2);
+		SpawnByTier(EnemyInfo.ThirdTierEnemy, EnemyInfo.EnemyKind, 3);
+	}
+}
 
+void AEnemyController::SpawnArmy()
+{
+	SpawnEnemy(EnemyArmyMaxSpawn.SkeletonEnemys);
+	SpawnEnemy(EnemyArmyMaxSpawn.LizardmanEnemys);
+	SpawnEnemy(EnemyArmyMaxSpawn.OrcEnemys);
 }
 
 void AEnemyController::StartWave(int WaveNum)
 {
 
+}
+
+void AEnemyController::CheckRendered(AEnemyBase* Enemy)
+{
+	if (Enemy)
+	{
+		USkeletalMeshComponent* EnemyMesh = Enemy->GetMesh();
+		UFloatingPawnMovement* EnemyMovement = Enemy->GetPawnMovement();
+
+		if (Enemy->IsActive())
+		{
+			APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+			FVector2D ScreenLocation = FVector2D::Zero();
+			controller->ProjectWorldLocationToScreen(Enemy->GetActorLocation(), ScreenLocation, false);
+
+			FVector2D ScreenSize = FVector2D::Zero();
+			GEngine->GameViewport->GetViewportSize(ScreenSize);
+			ScreenSize += FVector2D(250.0f, 250.0f);
+
+			if (EnemyMesh && EnemyMovement)
+			{
+				if (ScreenLocation.X > -250.0f && ScreenLocation.Y > -250.0f && ScreenLocation.X < ScreenSize.X && ScreenLocation.Y < ScreenSize.Y)
+				{
+					EnemyMesh->SetComponentTickInterval(0.0f);
+					EnemyMovement->SetComponentTickInterval(0.0f);
+				}
+				else
+				{
+					Enemy->GetMesh()->SetComponentTickInterval(0.1f);
+					EnemyMovement->SetComponentTickInterval(0.5f);
+				}
+			}
+		}
+	}
 }
 
 void AEnemyController::RegisterRenderTarget(AEnemyBase* Enemy)

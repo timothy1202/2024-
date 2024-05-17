@@ -30,9 +30,9 @@ public:
 #pragma region Pooling_Method
 
 	UFUNCTION(BlueprintCallable, Category = "Pooled Object")
-	void Deactivate();
+	virtual void Deactivate();
 
-	void SetActive(bool IsActive);
+	virtual void SetActive(bool IsActive);
 
 	FORCEINLINE void SetPoolIndex(int Index) { poolIndex = Index; }
 	FORCEINLINE bool IsActive() const { return active; }
