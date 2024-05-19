@@ -41,7 +41,11 @@ public:
 
 	void InitializeEnemyStorage();
 
-	void SpawnEnemys();
+	void SpawnByTier(const FEnemyType& EnemyInfo, const FName& EnemyKind, int Tier);
+
+	void SpawnEnemy(const FST_Enemy& EnemyInfo);
+
+	void SpawnArmy();
 
 	void StartWave(int WaveNum);
 

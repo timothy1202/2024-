@@ -17,6 +17,7 @@ void APooledEnemy::Deactivate()
 
 void APooledEnemy::SetActive(bool IsActive)
 {
+    SetActorTickEnabled(IsActive);
     active = IsActive;
-    SetActorHiddenInGame(IsActive);
+    SetActorHiddenInGame(!IsActive);
 }
