@@ -21,6 +21,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Animation/AnimInstance.h"
 #include "DrawDebugHelpers.h"
+#include "BaseBuilding.h"
 
 
 AEnemyBase::AEnemyBase()
@@ -293,143 +294,6 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 	return TPair<AActor*, int32>(HighestTarget, ATP);
 }
 
-//
-//TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
-//{
-//	AActor* HighestTarget;
-//	int32 ATP=0;
-//
-//	TArray<AActor*> OverlappingActors;
-//	TArray<AActor*> TaggedActors;
-//
-//	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
-//
-//	for (AActor* Actor : OverlappingActors)
-//	{
-//		TArray<UActorComponent*> PlayerTaggedComponents = 
-//			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("Player"));
-//
-//		if (PlayerTaggedComponents.Num() > 0)
-//		{
-//			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'Player' tagged component: %s"), *Actor->GetName());
-//			TaggedActors.Add(Actor);
-//		}
-//	}
-//
-//	int Value = 0;
-//	if (TaggedActors.Num() >= 0)
-//	{
-//		Value = TaggedActors.Num();
-//	}
-//
-//	switch (Value)
-//	{
-//	case 0:
-//	{
-//		HighestTarget = NULL;
-//		ATP = 0;
-//		break;
-//	}
-//	case 1:
-//	{
-//		ACharacter* PlayerCharacter = Cast<ACharacter>(TaggedActors[0]);
-//
-//		if (PlayerCharacter)
-//		{
-//			ATP = 110;
-//			HighestTarget = PlayerCharacter;
-//		}
-//		break;
-//	}
-//	default:
-//		break;
-//	}
-//
-//	return TPair<AActor*, int32>(HighestTarget, ATP);
-//}
-
-//TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
-//{
-//	AActor* HighestTarget;
-//	int32 ATP;
-//	TArray<int32> AtpArray;
-//
-//	TArray<AActor*> OverlappingActors;
-//	TArray<AActor*> TaggedActors;
-//
-//	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
-//
-//	for (AActor* Actor : OverlappingActors)
-//	{
-//		TArray<UActorComponent*> PlayerTaggedComponents =
-//			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("FriendlyBuilding"));
-//
-//		if (PlayerTaggedComponents.Num() > 0)
-//		{
-//			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'FriendlyBuilding' tagged component: %s"), *Actor->GetName());
-//			TaggedActors.Add(Actor);
-//		}
-//		else UE_LOG(LogTemp, Warning, TEXT("PlayerTaggedComponents.Num() is null"));
-//	}
-//
-//	int Value = 0;
-//	if (TaggedActors.Num() >= 0)
-//	{
-//		Value = TaggedActors.Num();
-//	}
-//
-//	switch (Value)
-//	{
-//		case 0:
-//		{
-//			HighestTarget = NULL;
-//			ATP = 0;
-//			break;
-//		}
-//		case 1:
-//		{
-//			AActor* SomeActor = TaggedActors[0];
-//			if (SomeActor->GetClass()->ImplementsInterface(UATPInterface::StaticClass()))
-//			{
-//				int32 ActorATP = IATPInterface::Execute_GetATP(SomeActor);
-//				ATP = ActorATP;
-//				HighestTarget = SomeActor;
-//			}
-//			else
-//			{
-//				UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
-//			}
-//
-//
-//			break;
-//		}
-//		default:
-//		{
-//			for (int i = 0; i < TaggedActors.Num(); i++)
-//			{
-//				AActor* SomeActor = TaggedActors[i];
-//				if (SomeActor->Implements<UATPInterface>())
-//				{
-//					IATPInterface* myInterface = Cast<IATPInterface>(SomeActor);
-//					if (myInterface)
-//					{
-//						AtpArray.Add(myInterface->GetATP());
-//					}
-//				}
-//				else UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
-//			}
-//
-//
-//			int32 IndexOfMaxValue;
-//			UKismetMathLibrary::MaxOfIntArray(AtpArray, IndexOfMaxValue, ATP);
-//			HighestTarget = TaggedActors[IndexOfMaxValue];
-//			break;
-//		}
-//	}
-//
-//	return TPair<AActor*, int32>(HighestTarget, ATP);
-//}
-
 TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 {
 	AActor* HighestTarget = nullptr;
@@ -457,27 +321,21 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 
 	for (AActor* Actor : TaggedActors)
 	{
-		if (Actor->Implements<UATPInterface>())
+		ABaseBuilding* BuildingActor = Cast<ABaseBuilding>(Actor);
+		if (BuildingActor)
 		{
-			IATPInterface* myInterface = Cast<IATPInterface>(Actor);
-			if (myInterface)
+			int32 CurrentATP = BuildingActor->GetBuildingATP();
+			if (CurrentATP > HighestATP)
 			{
-				int32 CurrentATP = myInterface->GetATP();
-				if (CurrentATP > HighestATP)
-				{
-					HighestATP = CurrentATP;
-					HighestTarget = Actor;
-				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Failed to cast to IATPInterface"));
+				HighestATP = CurrentATP;
+				HighestTarget = Actor;
 			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor does not implement ATPInterface"));
+			UE_LOG(LogTemp, Warning, TEXT("Actor is not of ABaseBuilding type"));
 		}
+
 	}
 
 	return TPair<AActor*, int32>(HighestTarget, HighestATP);
@@ -569,7 +427,7 @@ void AEnemyBase::Tick(float DeltaTime)
 			if (!detect_other_objects)
 			{
 					TPair<AActor*, int32> building_result = GetHighestBuildingATP();
-					TPair<AActor*, int32> player_result = GetPlayerATP();
+					//TPair<AActor*, int32> player_result = GetPlayerATP();
 
 					UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
 					if (building_result.Key != nullptr)
@@ -581,7 +439,7 @@ void AEnemyBase::Tick(float DeltaTime)
 						UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
 					}
 
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
+				/*	UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
 					if (player_result.Key != nullptr)
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
@@ -589,12 +447,13 @@ void AEnemyBase::Tick(float DeltaTime)
 					else
 					{
 							UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
-					}
+					}*/
 
-					if (building_result.Value > player_result.Value)
+					/*if (building_result.Value > player_result.Value)
 						HighestATPTarget = building_result.Key;
 					else
-						HighestATPTarget = player_result.Key;
+						HighestATPTarget = player_result.Key;*/
+					HighestATPTarget = building_result.Key;
 			}
 		}
 		CheckDistance();
