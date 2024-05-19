@@ -21,6 +21,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Animation/AnimInstance.h"
 #include "DrawDebugHelpers.h"
+#include "BaseBuilding.h"
 
 
 AEnemyBase::AEnemyBase()
@@ -98,6 +99,7 @@ void AEnemyBase::Init()
 	AAIC_EnemyBase* EnemyController = Cast<AAIC_EnemyBase>(MyController);
 	if (EnemyController)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ExecuteBT"));
 		EnemyController->ExecuteBT(MyBehaviorTree);
 	}
 
@@ -114,6 +116,28 @@ void AEnemyBase::Init()
 		EnemyController->SetMyPawn(this);
 	}
 
+	if (MyController)
+	{
+		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			if (is_long_range_npc)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("is_long_range_npc called!"));
+				if (aggresive)BlackboardComp->SetValueAsFloat("StopDistance", 800.0f);
+				else BlackboardComp->SetValueAsFloat("StopDistance", 600.0f);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Short called!"));
+				BlackboardComp->SetValueAsFloat("StopDistance", 70.0f);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Blackboard Component is null!"));
+		}
+	}
 }
 
 void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
@@ -230,12 +254,10 @@ void AEnemyBase::DetectOtherObject()
 
 }
 
-
-
 TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 {
-	AActor* HighestTarget;
-	int32 ATP=0;
+	AActor* HighestTarget = nullptr;
+	int32 ATP = 0;
 
 	TArray<AActor*> OverlappingActors;
 	TArray<AActor*> TaggedActors;
@@ -244,7 +266,7 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		TArray<UActorComponent*> PlayerTaggedComponents = 
+		TArray<UActorComponent*> PlayerTaggedComponents =
 			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("Player"));
 
 		if (PlayerTaggedComponents.Num() > 0)
@@ -254,33 +276,19 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 		}
 	}
 
-	int Value = 0;
-	if (TaggedActors.Num() >= 0)
-	{
-		Value = TaggedActors.Num();
-	}
-
-	switch (Value)
-	{
-	case 0:
-	{
-		HighestTarget = NULL;
-		ATP = 0;
-		break;
-	}
-	case 1:
+	if (TaggedActors.Num() == 1)
 	{
 		ACharacter* PlayerCharacter = Cast<ACharacter>(TaggedActors[0]);
-
 		if (PlayerCharacter)
 		{
 			ATP = 110;
 			HighestTarget = PlayerCharacter;
 		}
-		break;
 	}
-	default:
-		break;
+	else if (TaggedActors.Num() == 0)
+	{
+		HighestTarget = nullptr;
+		ATP = 0;
 	}
 
 	return TPair<AActor*, int32>(HighestTarget, ATP);
@@ -288,9 +296,8 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 
 TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 {
-	AActor* HighestTarget;
-	int32 ATP;
-	TArray<int32> AtpArray;
+	AActor* HighestTarget = nullptr;
+	int32 HighestATP = 0;
 
 	TArray<AActor*> OverlappingActors;
 	TArray<AActor*> TaggedActors;
@@ -304,69 +311,36 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 
 		if (PlayerTaggedComponents.Num() > 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'FriendlyBuilding' tagged component: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
-		else UE_LOG(LogTemp, Warning, TEXT("PlayerTaggedComponents.Num() is null"));
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Actor does not have FriendlyBuilding tag"));
+		}
 	}
 
-	int Value = 0;
-	if (TaggedActors.Num() >= 0)
+	for (AActor* Actor : TaggedActors)
 	{
-		Value = TaggedActors.Num();
+		ABaseBuilding* BuildingActor = Cast<ABaseBuilding>(Actor);
+		if (BuildingActor)
+		{
+			int32 CurrentATP = BuildingActor->GetBuildingATP();
+			if (CurrentATP > HighestATP)
+			{
+				HighestATP = CurrentATP;
+				HighestTarget = Actor;
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Actor is not of ABaseBuilding type"));
+		}
+
 	}
 
-	switch (Value)
-	{
-		case 0:
-		{
-			HighestTarget = NULL;
-			ATP = 0;
-			break;
-		}
-		case 1:
-		{
-			AActor* SomeActor = TaggedActors[0];
-			if (SomeActor->GetClass()->ImplementsInterface(UATPInterface::StaticClass()))
-			{
-				int32 ActorATP = IATPInterface::Execute_GetATP(SomeActor);
-				ATP = ActorATP;
-				HighestTarget = SomeActor;
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
-			}
-
-
-			break;
-		}
-		default:
-		{
-			for (int i = 0; i < TaggedActors.Num(); i++)
-			{
-				AActor* SomeActor = TaggedActors[i];
-				if (SomeActor->Implements<UATPInterface>())
-				{
-					IATPInterface* myInterface = Cast<IATPInterface>(SomeActor);
-					if (myInterface)
-					{
-						AtpArray.Add(myInterface->GetATP());
-					}
-				}
-				else UE_LOG(LogTemp, Warning, TEXT("myInterface is null"));
-			}
-
-
-			int32 IndexOfMaxValue;
-			UKismetMathLibrary::MaxOfIntArray(AtpArray, IndexOfMaxValue, ATP);
-			HighestTarget = TaggedActors[IndexOfMaxValue];
-			break;
-		}
-	}
-
-	return TPair<AActor*, int32>(HighestTarget, ATP);
+	return TPair<AActor*, int32>(HighestTarget, HighestATP);
 }
+
 
 void AEnemyBase::CheckDistance()
 {
@@ -462,32 +436,6 @@ void AEnemyBase::BeginPlay()
 
 	InitEnemyController();
 
-	Init();
-
-	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
-	if (MyController)
-	{
-		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
-		if (BlackboardComp)
-		{
-			if (is_long_range_npc)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("is_long_range_npc called!"));
-				if (aggresive)BlackboardComp->SetValueAsFloat("StopDistance", 800.0f);
-				else BlackboardComp->SetValueAsFloat("StopDistance", 600.0f);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Short called!"));
-				BlackboardComp->SetValueAsFloat("StopDistance", 70.0f);
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Blackboard Component is null!"));
-		}
-	}
-
 }
 
 void AEnemyBase::Tick(float DeltaTime)
@@ -502,7 +450,7 @@ void AEnemyBase::Tick(float DeltaTime)
 			if (!detect_other_objects)
 			{
 					TPair<AActor*, int32> building_result = GetHighestBuildingATP();
-					TPair<AActor*, int32> player_result = GetPlayerATP();
+					//TPair<AActor*, int32> player_result = GetPlayerATP();
 
 					UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
 					if (building_result.Key != nullptr)
@@ -514,7 +462,7 @@ void AEnemyBase::Tick(float DeltaTime)
 						UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
 					}
 
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
+				/*	UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
 					if (player_result.Key != nullptr)
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
@@ -522,12 +470,13 @@ void AEnemyBase::Tick(float DeltaTime)
 					else
 					{
 							UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
-					}
+					}*/
 
-					if (building_result.Value > player_result.Value)
+					/*if (building_result.Value > player_result.Value)
 						HighestATPTarget = building_result.Key;
 					else
-						HighestATPTarget = player_result.Key;
+						HighestATPTarget = player_result.Key;*/
+					HighestATPTarget = building_result.Key;
 			}
 		}
 		CheckDistance();

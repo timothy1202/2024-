@@ -23,6 +23,7 @@ void AAIC_EnemyBase::ExecuteBT(UBehaviorTree* const BT)
 {
 	if (BT)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("WTFFFFF"));
 		UBlackboardComponent* myBlackboard;
 		UseBlackboard(BT->BlackboardAsset, myBlackboard);
 		Blackboard = myBlackboard;
