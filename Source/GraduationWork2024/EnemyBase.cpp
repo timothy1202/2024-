@@ -551,6 +551,19 @@ void AEnemyBase::FindFirstThunderTarget()
 	}
 }
 
+bool AEnemyBase::CheckHighestATPAginstPlayer()
+{
+	if (HighestATPTarget == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
 void AEnemyBase::SecondThunderAttacked()
 {
 	FindSecondThunderTarget(TowerThunderTarget);
