@@ -10,6 +10,16 @@ UCLASS()
 class GRADUATIONWORK2024_API ABaseBuilding : public AActor
 {
 	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<ABaseBuilding> MyNextBuilding;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool ToggleInit = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int32 ATP;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -25,8 +35,7 @@ public:
 
 	int32 GetBuildingATP();
 
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	int32 ATP;
+	UFUNCTION(BlueprintCallable)
+	ABaseBuilding* SpawnBuildinig();
 
 };

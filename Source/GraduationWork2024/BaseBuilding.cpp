@@ -29,3 +29,24 @@ int32 ABaseBuilding::GetBuildingATP()
 {
 	return ATP;
 }
+
+ABaseBuilding* ABaseBuilding::SpawnBuildinig()
+{
+	UWorld* const World = GetWorld();
+
+	if (World != nullptr)
+	{
+		if (MyNextBuilding != nullptr)
+		{
+			FTransform SpawnTransform(FRotator().ZeroRotator, FVector().ZeroVector);
+			ABaseBuilding* NextBuilding = World->SpawnActorDeferred<ABaseBuilding>(MyNextBuilding, SpawnTransform);
+			if (NextBuilding != nullptr)
+			{
+				NextBuilding->ToggleInit = false;
+				NextBuilding->FinishSpawning(SpawnTransform);
+				return NextBuilding;
+			}
+		}
+	}
+	return nullptr;
+}
