@@ -145,6 +145,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool detect_other_objects;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool is_highest_atp_player;
+
 //사냥 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool NeverStopChasing;
@@ -259,6 +262,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void FindFirstThunderTarget();
+
+	UFUNCTION(BlueprintCallable)
+	bool CheckHighestATPAginstPlayer();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnFirstThunder(AActor * tunder_target);
