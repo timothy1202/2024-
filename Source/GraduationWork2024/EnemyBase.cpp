@@ -59,6 +59,19 @@ AEnemyBase::AEnemyBase()
 
 }
 
+void AEnemyBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("BeginPlay called!"));
+
+	RecognitionBoundary->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapBegin);
+	RecognitionBoundary->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapEnd);
+
+	InitEnemyController();
+
+}
+
 void AEnemyBase::InitEnemyController()
 {
 	AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyController::StaticClass());
@@ -423,19 +436,6 @@ void AEnemyBase::SetActive(bool IsActive)
 	{
 		component->SetComponentTickEnabled(IsActive);
 	}
-}
-
-void AEnemyBase::BeginPlay()
-{
-	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay called!"));
-
-	RecognitionBoundary->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapBegin);
-	RecognitionBoundary->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapEnd);
-
-	InitEnemyController();
-
 }
 
 void AEnemyBase::Tick(float DeltaTime)
