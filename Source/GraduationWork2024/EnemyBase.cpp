@@ -84,6 +84,13 @@ void AEnemyBase::InitEnemyController()
 
 }
 
+void AEnemyBase::SetPosibilities(FPosibilitesTray Tray)
+{
+	ResourceDropPosibilities.Add(Tray.firstPosibility);
+	ResourceDropPosibilities.Add(Tray.secondPosibility);
+	ResourceDropPosibilities.Add(Tray.thirdPosibility);
+}
+
 void AEnemyBase::Init()
 {
 	cur_health = EnemyNpc_MaxHealth;
@@ -114,6 +121,21 @@ void AEnemyBase::Init()
 		}
 
 		EnemyController->SetMyPawn(this);
+	}
+	else
+	{
+		switch (EnemyNpc_Tier)
+		{
+		case 1:
+			SetPosibilities(FirstTierPosibility);
+			break;
+		case 2:
+			SetPosibilities(SecondTierPosibility);
+			break;
+		case 3:
+			SetPosibilities(ThirdTierPosibility);
+			break;
+		}
 	}
 
 	if (MyController)
@@ -365,6 +387,7 @@ void AEnemyBase::UpdateDamagedHealthBar(float damage)
 
 void AEnemyBase::NpcDead_Implementation()
 {
+	CapsuleComponent->SetSimulatePhysics(false);
 	RecognitionBoundary->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PlayerAimCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -385,6 +408,48 @@ void AEnemyBase::NpcDead_Implementation()
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::NpcDeadAfterDelay, MontageLength, false);
 
+}
+
+int AEnemyBase::RandomResourceDrop()
+{
+	int sum = 0;
+	int num = UKismetMathLibrary::RandomIntegerInRange(1, 100);
+	for (int i = 0; i < ResourceDropPosibilities.Num(); i++)
+	{
+		bool InRange = UKismetMathLibrary::InRange_IntInt(num, sum, sum + ResourceDropPosibilities[i], false, true);
+		
+		if (InRange)
+			return i;
+		
+		sum += ResourceDropPosibilities[i];
+	}
+
+	return -1;
+}
+
+void AEnemyBase::DropResource()
+{
+	int result = RandomResourceDrop();
+
+	for (int i = 0; i < result; i++)
+	{
+		UWorld* const World = GetWorld();
+
+		if (World != nullptr)
+		{
+			if (ResourceType != nullptr)
+			{
+				FTransform SpawnTransform(FRotator().ZeroRotator, GetActorLocation(), FVector(0.5f, 0.5f, 0.5f));
+				ALootItem* ResourceInst = World->SpawnActorDeferred<ALootItem>(ResourceType, SpawnTransform);
+				if (ResourceInst != nullptr)
+				{
+					ResourceInst->SetAngle(UKismetMathLibrary::RandomFloatInRange(0.f, 360.f));
+					ResourceInst->SetDistance(item_drop_distance);
+					ResourceInst->FinishSpawning(SpawnTransform);
+				}
+			}
+		}
+	}
 }
 
 void AEnemyBase::NpcDeadAfterDelay()
@@ -410,11 +475,6 @@ void AEnemyBase::Deactivate()
 void AEnemyBase::SetActive(bool IsActive)
 {
 	Super::SetActive(IsActive);
-	/*Mesh->SetComponentTickEnabled(IsActive);
-	PawnMovement->SetComponentTickEnabled(IsActive);
-	CapsuleComponent->SetComponentTickEnabled(IsActive);
-	RecognitionBoundary->SetComponentTickEnabled(IsActive);
-	PlayerAimCollision->SetComponentTickEnabled(IsActive);*/
 
 	TArray<UActorComponent*> Comps;
 	GetComponents<UActorComponent>(Comps);
