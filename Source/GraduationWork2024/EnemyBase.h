@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "PooledEnemy.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "LootItem.h"
 #include "EnemyBase.generated.h"
 
 class UCapsuleComponent;
@@ -14,6 +15,22 @@ class USphereComponent;
 class UWidgetComponent;
 class AEnemyController;
 class UBehaviorTree;
+
+USTRUCT(Atomic, BlueprintType)
+struct FPosibilitesTray
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int firstPosibility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int secondPosibility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int thirdPosibility;
+};
 
 /**
  * 
@@ -151,25 +168,25 @@ private:
 //사냥 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool NeverStopChasing;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	int32 item_min_drop_count;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	int32 item_max_drop_count;
+//아이템 드롭 관련
+	UPROPERTY(EditDefaultsOnly, Category = "Resource", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<ALootItem> ResourceType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	int32 drop_count;
+	UPROPERTY(EditAnywhere, Category = "Resource", meta = (AllowPrivateAccess = "true"))
+	FPosibilitesTray FirstTierPosibility;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float angle;
+	UPROPERTY(EditAnywhere, Category = "Resource", meta = (AllowPrivateAccess = "true"))
+	FPosibilitesTray SecondTierPosibility;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float desired_angle;
+	UPROPERTY(EditAnywhere, Category = "Resource", meta = (AllowPrivateAccess = "true"))
+	FPosibilitesTray ThirdTierPosibility;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Resource", meta = (AllowPrivateAccess = "true"))
+	TArray<int32> ResourceDropPosibilities;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Resource", meta = (AllowPrivateAccess = "true"))
 	float item_drop_distance;
-
 
 //번개 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -239,9 +256,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void NpcDead();
+	virtual void NpcDead_Implementation();
+
+	void SetPosibilities(FPosibilitesTray Tray);
+	int RandomResourceDrop();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DropItem();
+
+	UFUNCTION(BlueprintCallable)
+	void DropResource();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayDieEffectFun();
@@ -283,3 +307,4 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 };
+
