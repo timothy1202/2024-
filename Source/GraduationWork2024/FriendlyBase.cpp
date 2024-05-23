@@ -68,6 +68,7 @@ void AFriendlyBase::Init()
 	if (FriendlyController)
 	{
 		FriendlyController->ExecuteBT(MyBehaviorTree);
+		UE_LOG(LogTemp, Warning, TEXT("BT Ready"));
 	}
 
 	PawnMovement->MaxSpeed = Unit_Walk_Spd;
