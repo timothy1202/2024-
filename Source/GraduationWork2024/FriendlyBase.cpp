@@ -122,6 +122,8 @@ void AFriendlyBase::NpcDead_Implementation()
 
 	APawn::DetachFromControllerPendingDestroy();
 
+	PlayDieEffectFun(); //Play Die Effect 노드용 함수
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	float MontageLength = 0;
 

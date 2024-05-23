@@ -118,6 +118,9 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UFloatingPawnMovement* GetPawnMovement() const { return PawnMovement; }
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayDieEffectFun();
+
 	UFUNCTION(BlueprintCallable)
 	void Init();
 
