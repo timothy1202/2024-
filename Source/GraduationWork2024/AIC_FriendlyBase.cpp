@@ -12,6 +12,7 @@ AAIC_FriendlyBase::AAIC_FriendlyBase(const FObjectInitializer& ObjectInitializer
 
 void AAIC_FriendlyBase::BeginPlay()
 {
+	Super::BeginPlay();
 }
 
 void AAIC_FriendlyBase::ExecuteBT(UBehaviorTree* BT)
@@ -27,6 +28,7 @@ void AAIC_FriendlyBase::ExecuteBT(UBehaviorTree* BT)
 
 void AAIC_FriendlyBase::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 }
 
 void AAIC_FriendlyBase::SetMyPawn(AFriendlyBase* my_Pawn)
