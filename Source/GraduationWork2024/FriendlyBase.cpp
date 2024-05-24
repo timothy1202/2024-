@@ -72,6 +72,7 @@ void AFriendlyBase::Init()
 	}
 
 	PawnMovement->MaxSpeed = Unit_Walk_Spd;
+	FriendlyController->SetMyPawn(this);
 
 }
 

@@ -40,7 +40,7 @@ void AAIC_FriendlyBase::Tick(float DeltaTime)
             if (IsValid(Closest_target))
             {
                 FString TargetName = Closest_target->GetName();
-                UE_LOG(LogTemp, Log, TEXT("Closest_target updated: %s"), *TargetName);
+                UE_LOG(LogTemp, Warning, TEXT("Closest_target updated: %s"), *TargetName);
             }
             else
             {
