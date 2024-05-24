@@ -81,10 +81,13 @@ private:
 	float Skill_ATK_Dmg;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float Hunter_Fire_Dmg;
+	float Fire_Archer_Fire_Area_Dmg;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float Hunter_Fire_Rng;
+	float Fire_Archer_Fire_Area_Rng;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int32 ATP;
 
 //체력 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
