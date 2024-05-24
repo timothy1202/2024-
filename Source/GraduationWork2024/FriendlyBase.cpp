@@ -74,6 +74,26 @@ void AFriendlyBase::Init()
 	PawnMovement->MaxSpeed = Unit_Walk_Spd;
 	FriendlyController->SetMyPawn(this);
 
+	if (MyController)
+	{
+		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			if (is_long_range_npc)
+			{
+				BlackboardComp->SetValueAsFloat("StopDistance", 800.0f);
+			}
+			else
+			{
+				BlackboardComp->SetValueAsFloat("StopDistance", 70.0f);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Blackboard Component is null!"));
+		}
+	}
+
 }
 
 
