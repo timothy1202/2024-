@@ -167,15 +167,20 @@ AActor* AFriendlyBase::FindClosestTarget()
 		TArray<UActorComponent*> PlayerTaggedComponents =
 			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("Enemy"));
 
+		FString ActorName = Actor->GetName();
+		UE_LOG(LogTemp, Log, TEXT("Actor Name: %s"), *ActorName);
+		// 액터의 이름을 가져옵니다.
+
 		if (PlayerTaggedComponents.Num() > 0)
 		{
 			tagged_actors.Add(Actor);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor does not have Enemy tag"));
+			UE_LOG(LogTemp, Warning, TEXT("Actor does not have 'Enemy' tag: %s"), *ActorName);
 		}
 	}
+
 
 	for (AActor* Actor : tagged_actors)
 	{
@@ -190,18 +195,30 @@ AActor* AFriendlyBase::FindClosestTarget()
 	return closest_target;
 }
 
-// Called every frame
 void AFriendlyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	UE_LOG(LogTemp, Warning, TEXT("NpcAttackTarget is null"));
 
 	if (!IsNpcDead)
 	{
 		NpcAttackTarget = FindClosestTarget();
 		CheckDistance();
-	}
 
+		// NpcAttackTarget이 유효한
+		if (NpcAttackTarget)
+		{
+			// NpcAttackTarget의 이름을 로그로 출력
+			UE_LOG(LogTemp, Warning, TEXT("NpcAttackTarget: %s"), *NpcAttackTarget->GetName());
+		}
+		else
+		{
+			// NpcAttackTarget이 유효하지 않을 경우의 로그
+			UE_LOG(LogTemp, Warning, TEXT("NpcAttackTarget is null"));
+		}
+	}
 }
+
 
 // Called to bind functionality to input
 void AFriendlyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
