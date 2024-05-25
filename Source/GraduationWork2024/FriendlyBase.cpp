@@ -81,11 +81,11 @@ void AFriendlyBase::Init()
 		{
 			if (is_long_range_npc)
 			{
-				BlackboardComp->SetValueAsFloat("StopDistance", 800.0f);
+				BlackboardComp->SetValueAsFloat("StopDistance", 600.0f);
 			}
 			else
 			{
-				BlackboardComp->SetValueAsFloat("StopDistance", 70.0f);
+				BlackboardComp->SetValueAsFloat("StopDistance", 60.0f);
 			}
 		}
 		else
