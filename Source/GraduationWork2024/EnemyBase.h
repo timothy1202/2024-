@@ -248,6 +248,7 @@ public:
 	
 	TPair<AActor*, int32> GetPlayerATP();
 	TPair<AActor*, int32> GetHighestBuildingATP();
+	TPair<AActor*, int32> GetHighestAlliesATP();
 
 	void CheckDistance();
 

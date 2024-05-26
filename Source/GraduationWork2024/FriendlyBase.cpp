@@ -216,6 +216,11 @@ AActor* AFriendlyBase::FindClosestTarget()
 	return closest_target;
 }
 
+int32 AFriendlyBase::GetFriendlyATP()
+{
+	return ATP;
+}
+
 void AFriendlyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

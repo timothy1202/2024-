@@ -149,6 +149,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AActor* FindClosestTarget();
 
+	int32 GetFriendlyATP();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

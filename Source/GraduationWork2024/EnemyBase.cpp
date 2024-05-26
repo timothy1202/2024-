@@ -22,6 +22,8 @@
 #include "Animation/AnimInstance.h"
 #include "DrawDebugHelpers.h"
 #include "BaseBuilding.h"
+#include "FriendlyBase.h"
+#include "CoreMinimal.h"
 
 
 AEnemyBase::AEnemyBase()
@@ -376,6 +378,53 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 	return TPair<AActor*, int32>(HighestTarget, HighestATP);
 }
 
+TPair<AActor*, int32> AEnemyBase::GetHighestAlliesATP()
+{
+	AActor* HighestTarget = nullptr;
+	int32 HighestATP = 0;
+
+	TArray<AActor*> OverlappingActors;
+	TArray<AActor*> TaggedActors;
+
+	RecognitionBoundary->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		TArray<UActorComponent*> PlayerTaggedComponents =
+			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("PlayerAllies"));
+
+		if (PlayerTaggedComponents.Num() > 0)
+		{
+			TaggedActors.Add(Actor);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Actor does not have PlayerAllies tag"));
+		}
+	}
+
+	for (AActor* Actor : TaggedActors)
+	{
+		AFriendlyBase* AllyActor = Cast<AFriendlyBase>(Actor);
+		if (AllyActor)
+		{
+			int32 CurrentATP = AllyActor->GetFriendlyATP();
+			if (CurrentATP > HighestATP)
+			{
+				HighestATP = CurrentATP;
+				HighestTarget = Actor;
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Actor is not of ABaseBuilding type"));
+		}
+
+	}
+
+	return TPair<AActor*, int32>(HighestTarget, HighestATP);
+}
+
 
 void AEnemyBase::CheckDistance()
 {
@@ -511,31 +560,33 @@ void AEnemyBase::Tick(float DeltaTime)
 			{
 					TPair<AActor*, int32> building_result = GetHighestBuildingATP();
 					TPair<AActor*, int32> player_result = GetPlayerATP();
+					TPair<AActor*, int32> friendly_result = GetHighestAlliesATP();
 
-					UE_LOG(LogTemp, Warning, TEXT("Building Result Value: %d"), building_result.Value);
-					if (building_result.Key != nullptr)
-					{
-						UE_LOG(LogTemp, Warning, TEXT("Building Result Key: %s"), *building_result.Key->GetName());
-					}
-					else
-					{
-						UE_LOG(LogTemp, Warning, TEXT("Building Result Key: NULL"));
-					}
+					// AActor의 포인터가 유효한지 확인하고, 그렇다면 해당 액터의 이름을 가져옵니다.
+					FString ActorName = (friendly_result.Key != nullptr) ? friendly_result.Key->GetName() : TEXT("None");
 
-					UE_LOG(LogTemp, Warning, TEXT("Player Result Value: %d"), player_result.Value);
-					if (player_result.Key != nullptr)
-					{
-						UE_LOG(LogTemp, Warning, TEXT("Player Result Key: %s"), *player_result.Key->GetName());
-					}
-					else
-					{
-							UE_LOG(LogTemp, Warning, TEXT("Player Result Key: NULL"));
-					}
+					// 이제 값을 로그로 출력합니다. 로그 카테고리는 'LogTemp'를 사용하며, 경고 수준으로 출력합니다.
+					UE_LOG(LogTemp, Warning, TEXT("Friendly Actor: %s, ATP Value: %d"), *ActorName, friendly_result.Value);
 
-					if (building_result.Value > player_result.Value)
+					int32 HighestATPValue = 0;
+
+					if (building_result.Value > HighestATPValue) 
+					{
+						HighestATPValue = building_result.Value;
 						HighestATPTarget = building_result.Key;
-					else
+					}
+
+					if (player_result.Value > HighestATPValue) 
+					{
+						HighestATPValue = player_result.Value;
 						HighestATPTarget = player_result.Key;
+					}
+
+					if (friendly_result.Value > HighestATPValue) 
+					{
+						HighestATPValue = friendly_result.Value;
+						HighestATPTarget = friendly_result.Key;
+					}
 			}
 		}
 		CheckDistance();
