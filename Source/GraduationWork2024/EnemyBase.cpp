@@ -167,7 +167,7 @@ void AEnemyBase::Init()
 			else
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Short called!"));
-				BlackboardComp->SetValueAsFloat("StopDistance", 70.0f);
+				BlackboardComp->SetValueAsFloat("StopDistance", 100.0f);
 			}
 		}
 		else
