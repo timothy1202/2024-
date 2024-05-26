@@ -3,11 +3,12 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "FriendlyBase.h"
+#include "CustomCrowdFollowingComponent.h"
 
 AAIC_FriendlyBase::AAIC_FriendlyBase(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
+    : Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
 {
-
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 void AAIC_FriendlyBase::BeginPlay()
