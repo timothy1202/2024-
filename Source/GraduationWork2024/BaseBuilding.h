@@ -35,7 +35,10 @@ public:
 
 	int32 GetBuildingATP();
 
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void OnSpawned();
+
 	UFUNCTION(BlueprintCallable)
-	ABaseBuilding* SpawnBuildinig();
+	ABaseBuilding* SpawnBuildinig(TSubclassOf<ABaseBuilding> OverrideBuilding);
 
 };

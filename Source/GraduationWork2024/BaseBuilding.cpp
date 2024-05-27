@@ -4,7 +4,7 @@
 #include "BaseBuilding.h"
 
 // Sets default values
-ABaseBuilding::ABaseBuilding()
+ABaseBuilding::ABaseBuilding() : ATP(0)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -30,15 +30,18 @@ int32 ABaseBuilding::GetBuildingATP()
 	return ATP;
 }
 
-ABaseBuilding* ABaseBuilding::SpawnBuildinig()
+ABaseBuilding* ABaseBuilding::SpawnBuildinig(TSubclassOf<ABaseBuilding> OverrideBuilding)
 {
+	if (OverrideBuilding != nullptr)
+		MyNextBuilding = OverrideBuilding;
+
 	UWorld* const World = GetWorld();
 
 	if (World != nullptr)
 	{
 		if (MyNextBuilding != nullptr)
 		{
-			FTransform SpawnTransform(FRotator().ZeroRotator, FVector().ZeroVector);
+			FTransform SpawnTransform(GetActorRotation(), GetActorLocation());
 			ABaseBuilding* NextBuilding = World->SpawnActorDeferred<ABaseBuilding>(MyNextBuilding, SpawnTransform);
 			if (NextBuilding != nullptr)
 			{

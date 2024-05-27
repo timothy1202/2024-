@@ -68,12 +68,12 @@ private:
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UWidgetComponent> HealthWidget;
 
-//º¯¼ö¿ë private
+//ë³€ìˆ˜ìš© private
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	AEnemyController* enemy_controller;
 
-//µ¥ÀÌÅÍ Å×ÀÌºí º¯¼ö
+//ë°ì´í„° í…Œì´ë¸” ë³€ìˆ˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	FString EnemyNpcType;
 
@@ -140,7 +140,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float Aggression_Run_Speed;
 
-//Ã¼·Â °ü·Ã
+//ì²´ë ¥ ê´€ë ¨
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float cur_health;
 
@@ -153,11 +153,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* DieMontage;
 
-//BT °ü·Ã
+//BT ê´€ë ¨
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* MyBehaviorTree;
 
-//Ä§·« °ü·Ã
+//ì¹¨ëµ ê´€ë ¨
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool detect_other_objects;
@@ -165,11 +165,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool is_highest_atp_player;
 
-//»ç³É °ü·Ã
+//ì‚¬ëƒ¥ ê´€ë ¨
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool NeverStopChasing;
 
-//¾ÆÀÌÅÛ µå·Ó °ü·Ã
+//ì•„ì´í…œ ë“œë¡­ ê´€ë ¨
 	UPROPERTY(EditDefaultsOnly, Category = "Resource", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ALootItem> ResourceType;
 
@@ -188,7 +188,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Resource", meta = (AllowPrivateAccess = "true"))
 	float item_drop_distance;
 
-//¹ø°³ °ü·Ã
+//ë²ˆê°œ ê´€ë ¨
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	AActor* FirstThunderTarget; 
 
@@ -204,7 +204,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float ThunderScale;
 
-//°ø°İ °ü·Ã
+//ê³µê²© ê´€ë ¨
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
 
