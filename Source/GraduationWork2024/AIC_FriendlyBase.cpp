@@ -37,17 +37,6 @@ void AAIC_FriendlyBase::Tick(float DeltaTime)
         {
             Closest_target = myPawn->NpcAttackTarget;
 
-            // Closest_target 값 로그에 출력
-            if (IsValid(Closest_target))
-            {
-                FString TargetName = Closest_target->GetName();
-                UE_LOG(LogTemp, Warning, TEXT("Closest_target updated: %s"), *TargetName);
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("Closest_target is not valid"));
-            }
-
             UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
             if (BlackboardComp)
             {
@@ -63,9 +52,9 @@ void AAIC_FriendlyBase::Tick(float DeltaTime)
 }
 
 
-void AAIC_FriendlyBase::SetMyPawn(AFriendlyBase* my_Pawn)
+void AAIC_FriendlyBase::SetMyPawn(AFriendlyBase* my_Pawn1)
 {
-	myPawn = my_Pawn;
+	myPawn = my_Pawn1;
 }
 
 USkeletalMeshComponent* AAIC_FriendlyBase::GetMeshComponent() const
