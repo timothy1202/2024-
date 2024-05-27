@@ -6,10 +6,12 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "EnemyBase.h"
+#include "CustomCrowdFollowingComponent.h"
 
 AAIC_EnemyBase::AAIC_EnemyBase(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
 {
+	PrimaryActorTick.bCanEverTick = true;
 	
 }
 

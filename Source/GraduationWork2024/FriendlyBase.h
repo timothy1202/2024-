@@ -45,7 +45,13 @@ private:
 private:
 //데이터 테이블 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FString Unit_Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	int32 Unit_Tier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FString Unit_Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float Unit_Max_Health;
@@ -75,10 +81,13 @@ private:
 	float Skill_ATK_Dmg;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float Hunter_Fire_Dmg;
+	float Fire_Archer_Fire_Area_Dmg;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float Hunter_Fire_Rng;
+	float Fire_Archer_Fire_Area_Rng;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int32 ATP;
 
 //체력 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -97,6 +106,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* MyBehaviorTree;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool is_long_range_npc;
+
 //공격 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
@@ -111,6 +123,9 @@ public:
 
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UFloatingPawnMovement* GetPawnMovement() const { return PawnMovement; }
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayDieEffectFun();
 
 	UFUNCTION(BlueprintCallable)
 	void Init();
@@ -133,6 +148,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AActor* FindClosestTarget();
+
+	int32 GetFriendlyATP();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

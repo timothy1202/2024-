@@ -37,7 +37,7 @@ private:
 	AFriendlyBase* myPawn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	AActor* highest_ATP_target;
+	AActor* Closest_target;
 
 	USkeletalMeshComponent* GetMeshComponent() const;
 	
