@@ -91,7 +91,6 @@ void AEnemyBase::InitEnemyController()
 	}
 	else
 	{
-		// FoundActor가 nullptr인 경우 로그 출력
 		UE_LOG(LogTemp, Warning, TEXT("AEnemyController instance not found."));
 	}
 
@@ -408,7 +407,7 @@ void AEnemyBase::NpcDead_Implementation()
 	APawn::DetachFromControllerPendingDestroy();
 
 	DropItem();
-	PlayDieEffectFun(); //Play Die Effect 노드용 함수
+	PlayDieEffectFun();
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	float MontageLength=0;
