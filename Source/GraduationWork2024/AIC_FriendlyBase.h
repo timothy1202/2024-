@@ -30,7 +30,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void Tick(float DeltaTime) override;
 
-	void SetMyPawn(AFriendlyBase* my_Pawn);
+	void SetMyPawn(AFriendlyBase* my_Pawn1);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
