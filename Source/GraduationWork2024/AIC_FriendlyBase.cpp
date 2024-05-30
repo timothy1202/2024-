@@ -9,6 +9,24 @@ AAIC_FriendlyBase::AAIC_FriendlyBase(const FObjectInitializer& ObjectInitializer
     : Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
 {
     PrimaryActorTick.bCanEverTick = true;
+
+    auto PathFollowComp = FindComponentByClass<UCustomCrowdFollowingComponent>();
+    if (PathFollowComp != nullptr)
+    {
+        SetPathFollowingComponent(PathFollowComp);
+        auto CrowdFollowingComponentOverriden = Cast<UCustomCrowdFollowingComponent>(PathFollowComp);
+        if (CrowdFollowingComponentOverriden != nullptr)
+        {
+            CrowdFollowingComponentOverriden->Initialize();
+            CrowdFollowingComponentOverriden->SetCrowdAvoidanceQuality(ECrowdAvoidanceQuality::High);
+            CrowdFollowingComponentOverriden->SetCrowdSeparationWeight(200.0f);
+            CrowdFollowingComponentOverriden->SetCrowdSeparation(true);
+            CrowdFollowingComponentOverriden->SetCrowdCollisionQueryRange(10000.f);
+            CrowdFollowingComponentOverriden->SetAvoidanceGroup(1);
+            CrowdFollowingComponentOverriden->SetCrowdAnticipateTurns(true);
+            CrowdFollowingComponentOverriden->UpdateCrowdAgentParams();
+        }
+    }
 }
 
 void AAIC_FriendlyBase::BeginPlay()
