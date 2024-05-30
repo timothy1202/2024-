@@ -112,7 +112,8 @@ void AEnemyBase::Init()
 
 	FVector Origin;
 	FVector BoxExtent;
-	float SphereRadius = RecognitionBoundary->GetScaledSphereRadius();
+	float SphereRadius;
+	UKismetSystemLibrary::GetComponentBounds(Mesh,Origin, BoxExtent, SphereRadius);
 	show_health_dis = SphereRadius * 1.5f;
 
 	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
