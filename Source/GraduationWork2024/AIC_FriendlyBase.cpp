@@ -21,7 +21,7 @@ AAIC_FriendlyBase::AAIC_FriendlyBase(const FObjectInitializer& ObjectInitializer
             CrowdFollowingComponentOverriden->SetCrowdAvoidanceQuality(ECrowdAvoidanceQuality::High);
             CrowdFollowingComponentOverriden->SetCrowdSeparationWeight(100.0f);
             CrowdFollowingComponentOverriden->SetCrowdSeparation(true);
-            CrowdFollowingComponentOverriden->SetCrowdCollisionQueryRange(1000.f);
+            CrowdFollowingComponentOverriden->SetCrowdCollisionQueryRange(10000.f);
             CrowdFollowingComponentOverriden->SetAvoidanceGroup(1);
             CrowdFollowingComponentOverriden->SetCrowdAnticipateTurns(true);
             CrowdFollowingComponentOverriden->UpdateCrowdAgentParams();
