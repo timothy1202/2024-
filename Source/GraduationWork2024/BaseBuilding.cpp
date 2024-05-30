@@ -42,7 +42,7 @@ ABaseBuilding* ABaseBuilding::SpawnBuildinig(TSubclassOf<ABaseBuilding> Override
 		if (MyNextBuilding != nullptr)
 		{
 			FTransform SpawnTransform(GetActorRotation(), GetActorLocation());
-			ABaseBuilding* NextBuilding = World->SpawnActorDeferred<ABaseBuilding>(MyNextBuilding, SpawnTransform);
+			ABaseBuilding* NextBuilding = World->SpawnActorDeferred<ABaseBuilding>(MyNextBuilding, SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 			if (NextBuilding != nullptr)
 			{
 				NextBuilding->ToggleInit = false;
