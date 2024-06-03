@@ -455,7 +455,8 @@ void AEnemyBase::NpcDead_Implementation()
 	APawn::DetachFromControllerPendingDestroy();
 
 	DropItem();
-	PlayDieEffectFun();
+	PlayDieEffectFun(); 
+	OnDetroyEnemy.Broadcast(this);
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	float MontageLength=0;
@@ -518,7 +519,6 @@ void AEnemyBase::NpcDeadAfterDelay()
 	if (IsValid(enemy_controller))
 	{
 		enemy_controller->RemoveFromRenderTarget(this);
-		OnDetroyEnemy.Broadcast(this);
 	}
 	DestroyActor();
 }

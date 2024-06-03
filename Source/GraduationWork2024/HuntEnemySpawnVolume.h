@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "EnemyBase.h"
+#include "ICameraController.h"
 #include "HuntEnemySpawnVolume.generated.h"
 
 class UBoxComponent;
 
 UCLASS()
-class GRADUATIONWORK2024_API AHuntEnemySpawnVolume : public AActor
+class GRADUATIONWORK2024_API AHuntEnemySpawnVolume : public AActor, public IICameraController
 {
 	GENERATED_BODY()
 	
@@ -29,7 +30,7 @@ private:
 
 	FTimerHandle SpawnTimerHandle;
 	AActor* PlayerRef = nullptr;
-	bool bExecute;
+	bool isCameraOut = false;
 	int32 count = 0;
 	
 public:	
@@ -52,6 +53,9 @@ public:
 	void Volume_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION()
+	void OnEnemyDead(AEnemyBase* Enemy);
+
 	void SpawnEnemy(FVector Pos);
 
 	void DestroyEnemy();
@@ -60,6 +64,7 @@ public:
 
 	void FindPositionAndSpawnHuntEnemy();
 
-	UFUNCTION()
-	void OnEnemyDead(AEnemyBase* Enemy);
+	virtual void OnSpectator_Implementation(bool isEnable) override;
+
+	virtual void OnSequencer_Implementation(bool isEnable) override;
 };

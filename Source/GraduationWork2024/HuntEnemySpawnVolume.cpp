@@ -6,14 +6,13 @@
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/Character.h"
 
 // Sets default values
-AHuntEnemySpawnVolume::AHuntEnemySpawnVolume() : bExecute(false)
+AHuntEnemySpawnVolume::AHuntEnemySpawnVolume()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	Volume = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnVolume"));
 	RootComponent = Volume;
 
 	Volume->SetCollisionProfileName("Volume");
@@ -24,15 +23,13 @@ void AHuntEnemySpawnVolume::Volume_OnOverlapBegin(UPrimitiveComponent* Overlappe
 {
 	if (OtherComp->ComponentHasTag("Player"))
 	{
-		bExecute = true;
 		PlayerRef = OtherActor;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("BeginTimer!"));
 		FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 		if (TimerManager.IsTimerActive(SpawnTimerHandle))
 		{
 			TimerManager.ClearTimer(SpawnTimerHandle);
 		}
-		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy, 5.f, true);
+		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy, 1.f, true);
 	}
 }
 
@@ -40,8 +37,6 @@ void AHuntEnemySpawnVolume::Volume_OnOverlapEnd(UPrimitiveComponent* OverlappedC
 {
 	if (OtherComp->ComponentHasTag("Player"))
 	{
-		bExecute = false;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("EndOverlap!"));
 		FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 		if (TimerManager.IsTimerActive(SpawnTimerHandle))
 		{
@@ -66,8 +61,6 @@ void AHuntEnemySpawnVolume::SpawnEnemy(FVector Pos)
 			Enemy->OnDetroyEnemy.AddDynamic(this, &AHuntEnemySpawnVolume::OnEnemyDead);
 			EnemyArr.Add(Enemy);
 			count++;
-
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Spawn!"));
 		}
 	}
 }
@@ -78,22 +71,24 @@ void AHuntEnemySpawnVolume::DestroyEnemy()
 	{
 		// 적NPC arr에서 제거 - 플레이어 화면 내에 없을 때
 		AEnemyBase* Enemy = nullptr;
-		UE_LOG(LogTemp, Warning, TEXT("Enemy Ready To Destroy!"));
 		float MaxDistance = 0.f;
+
+		// 멀리 있는 적부터 제거
 		for (AEnemyBase* Elem : EnemyArr)
 		{
-			float PlayerToEnemyDist = Elem->GetHorizontalDistanceTo(PlayerRef);
+			FVector EnemyLocation = Elem->GetActorLocation();
+			FVector PlayerLocation = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation();
+			float PlayerToEnemyDist = UKismetMathLibrary::Vector_Distance2D(EnemyLocation, PlayerLocation);
 			if (MaxDistance < PlayerToEnemyDist)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("SetMaxDistance"));
 				MaxDistance = PlayerToEnemyDist;
 				Enemy = Elem;
 			}
 		}
 		if (Enemy != nullptr)
 		{
-			FVector EnemyPos = Enemy->GetActorLocation();
-			if (!CheckPointInCamera(EnemyPos))
+			// 3초 내에 렌더링 된 적이 있다면
+			if (!Enemy->WasRecentlyRendered(3.f))
 			{
 				EnemyArr.Remove(Enemy);
 				Enemy->Destroy();
@@ -115,7 +110,7 @@ bool AHuntEnemySpawnVolume::CheckPointInCamera(FVector Point)
 	controller->ProjectWorldLocationToScreen(Point, ScreenLocation, false);
 
 	FVector2D ScreenSize = FVector2D::Zero();
-	FVector2D Offset = FVector2D(500.0f, 500.0f);
+	FVector2D Offset = FVector2D(250.0f, 250.0f);
 	GEngine->GameViewport->GetViewportSize(ScreenSize);
 	ScreenSize += Offset;
 
@@ -131,35 +126,37 @@ bool AHuntEnemySpawnVolume::CheckPointInCamera(FVector Point)
 
 void AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy()
 {
-	if (PlayerRef != nullptr)
+	if (!isCameraOut)
 	{
-		FVector Origin = PlayerRef->GetActorLocation();
-		if (auto* const NavSys = UNavigationSystemV1::GetCurrent(GetWorld()))
+		if (PlayerRef != nullptr)
 		{
-			FNavLocation Loc;
-			FVector BoxExtent = Volume->GetScaledBoxExtent();
-			float MaxDistance = UKismetMathLibrary::Max(BoxExtent.X, BoxExtent.Y);
-
-			if (NavSys->GetRandomReachablePointInRadius(Origin, MaxDistance, Loc))
+			FVector Origin = PlayerRef->GetActorLocation();
+			if (auto* const NavSys = UNavigationSystemV1::GetCurrent(GetWorld()))
 			{
-				FVector FinalLocation = Loc.Location;
-				const FBoxSphereBounds& Box = Volume->Bounds;
+				FNavLocation Loc;
+				FVector BoxExtent = Volume->GetScaledBoxExtent();
+				float MaxDistance = UKismetMathLibrary::Max(BoxExtent.X, BoxExtent.Y);
 
-				if (Box.GetBox().IsInside(FinalLocation) && !CheckPointInCamera(FinalLocation))
+				if (NavSys->GetRandomReachablePointInRadius(Origin, MaxDistance, Loc))
 				{
-					if (count > 10)
+					FVector FinalLocation = Loc.Location;
+					const FBoxSphereBounds& Box = Volume->Bounds;
+
+					if (Box.GetBox().IsInside(FinalLocation) && !CheckPointInCamera(FinalLocation))
 					{
-						GetWorld()->GetTimerManager().PauseTimer(SpawnTimerHandle);
+						if (count >= MaxSpawnCount)
+						{
+							GetWorld()->GetTimerManager().PauseTimer(SpawnTimerHandle);
+						}
+						else
+						{
+							SpawnEnemy(FinalLocation);
+						}
 					}
 					else
 					{
-						SpawnEnemy(FinalLocation);
+						FindPositionAndSpawnHuntEnemy();
 					}
-					return;
-				}
-				else
-				{
-					FindPositionAndSpawnHuntEnemy();
 				}
 			}
 		}
@@ -170,6 +167,24 @@ void AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy()
 void AHuntEnemySpawnVolume::OnEnemyDead(AEnemyBase* Enemy)
 {
 	EnemyArr.Remove(Enemy);
+	count--;
+	GetWorld()->GetTimerManager().UnPauseTimer(SpawnTimerHandle);
+}
+
+void AHuntEnemySpawnVolume::OnSpectator_Implementation(bool isEnable)
+{
+	if (isEnable)
+		isCameraOut = true;
+	else
+		isCameraOut = false;
+}
+
+void AHuntEnemySpawnVolume::OnSequencer_Implementation(bool isEnable)
+{
+	if (isEnable)
+		isCameraOut = true;
+	else
+		isCameraOut = false;
 }
 
 // Called when the game starts or when spawned
