@@ -68,10 +68,6 @@ void AAIC_EnemyBase::Tick(float DeltaTime)
             }
         }
     }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("myPawn is not valid"));
-    }
 }
 
 void AAIC_EnemyBase::SetMyPawn(AEnemyBase* my_Pawn)
