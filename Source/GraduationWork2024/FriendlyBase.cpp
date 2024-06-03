@@ -181,24 +181,14 @@ AActor* AFriendlyBase::FindClosestTarget()
 	TArray<AActor*> overlapping_actors;
 	TArray<AActor*> tagged_actors;
 
-	RecognitionBoundary->GetOverlappingActors(overlapping_actors);
+	TArray<UPrimitiveComponent*> OverlappingComponents;
+	RecognitionBoundary->GetOverlappingComponents(OverlappingComponents);
 
-	for (AActor* Actor : overlapping_actors)
+	for (UPrimitiveComponent* Component : OverlappingComponents)
 	{
-		TArray<UActorComponent*> PlayerTaggedComponents =
-			Actor->GetComponentsByTag(UActorComponent::StaticClass(), TEXT("Enemy"));
-
-		FString ActorName = Actor->GetName();
-		UE_LOG(LogTemp, Log, TEXT("Actor Name: %s"), *ActorName);
-		// 액터의 이름을 가져옵니다.
-
-		if (PlayerTaggedComponents.Num() > 0)
+		if (Component->ComponentHasTag(TEXT("Enemy")))
 		{
-			tagged_actors.Add(Actor);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor does not have 'Enemy' tag: %s"), *ActorName);
+			tagged_actors.Add(Component->GetOwner());
 		}
 	}
 
