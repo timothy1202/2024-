@@ -13,6 +13,7 @@ AHuntEnemySpawnVolume::AHuntEnemySpawnVolume()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	Volume = CreateDefaultSubobject<UBoxComponent>(TEXT("Volume"));
 	RootComponent = Volume;
 
 	Volume->SetCollisionProfileName("Volume");
@@ -29,7 +30,7 @@ void AHuntEnemySpawnVolume::Volume_OnOverlapBegin(UPrimitiveComponent* Overlappe
 		{
 			TimerManager.ClearTimer(SpawnTimerHandle);
 		}
-		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy, 1.f, true);
+		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy, 5.f, true);
 	}
 }
 
