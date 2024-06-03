@@ -32,6 +32,8 @@ public:
 	int thirdPosibility;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDestroyEnemy, AEnemyBase*, Enemy);
+
 /**
  * 
  */
@@ -42,6 +44,9 @@ class GRADUATIONWORK2024_API AEnemyBase : public APooledEnemy
 
 public:
 	AEnemyBase();
+
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, BlueprintCallable, Category = "Event")
+	FOnDestroyEnemy OnDetroyEnemy;
 
 private:
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

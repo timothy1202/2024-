@@ -518,6 +518,7 @@ void AEnemyBase::NpcDeadAfterDelay()
 	if (IsValid(enemy_controller))
 	{
 		enemy_controller->RemoveFromRenderTarget(this);
+		OnDetroyEnemy.Broadcast(this);
 	}
 	DestroyActor();
 }
