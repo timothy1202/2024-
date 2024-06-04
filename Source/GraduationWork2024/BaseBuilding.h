@@ -19,6 +19,9 @@ private:
 	bool ToggleInit = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bBuilt = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	int32 ATP;
 	
 public:	
@@ -41,4 +44,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ABaseBuilding* SpawnBuildinig(TSubclassOf<ABaseBuilding> OverrideBuilding);
 
+	FORCEINLINE bool GetBuilt() { return bBuilt; }
 };

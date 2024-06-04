@@ -65,8 +65,6 @@ void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay called!"));
-
 	RecognitionBoundary->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapBegin);
 	RecognitionBoundary->OnComponentEndOverlap.AddDynamic(this, &AEnemyBase::Recognition_OnOverlapEnd);
 
@@ -82,20 +80,11 @@ void AEnemyBase::InitEnemyController()
 	{
 		enemy_controller = Cast<AEnemyController>(FoundActor);
 
-		if (!enemy_controller)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("FoundActor is not an AEnemyController."));
-		}
-		else
+		if (enemy_controller)
 		{
 			enemy_controller->RegisterRenderTarget(this);
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AEnemyController instance not found."));
-	}
-
 }
 
 void AEnemyBase::SetPosibilities(FPosibilitesTray Tray)
@@ -108,7 +97,7 @@ void AEnemyBase::SetPosibilities(FPosibilitesTray Tray)
 void AEnemyBase::Init()
 {
 	cur_health = EnemyNpc_MaxHealth;
-	RecognitionBoundary->SetSphereRadius(EnemyNpc_AtkDist, true); 
+	RecognitionBoundary->SetSphereRadius(EnemyNpc_AtkDist, true);
 
 	FVector Origin;
 	FVector BoxExtent;
@@ -116,11 +105,10 @@ void AEnemyBase::Init()
 	show_health_dis = SphereRadius * 1.5f;
 
 	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
-	AAIC_EnemyBase* EnemyController = Cast<AAIC_EnemyBase>(MyController);
-	if (EnemyController)
+	AAIC_EnemyBase* EnemyAIController = Cast<AAIC_EnemyBase>(MyController);
+	if (EnemyAIController)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ExecuteBT"));
-		EnemyController->ExecuteBT(MyBehaviorTree);
+		EnemyAIController->ExecuteBT(MyBehaviorTree);
 	}
 
 	if (aggresive)
@@ -133,7 +121,7 @@ void AEnemyBase::Init()
 			BlackboardComp->SetValueAsBool("IsAggressive", true);
 		}
 
-		EnemyController->SetMyPawn(this);
+		EnemyAIController->SetMyPawn(this);
 	}
 	else
 	{
@@ -158,25 +146,19 @@ void AEnemyBase::Init()
 		{
 			if (is_long_range_npc)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("is_long_range_npc called!"));
 				if (aggresive)BlackboardComp->SetValueAsFloat("StopDistance", 800.0f);
 				else BlackboardComp->SetValueAsFloat("StopDistance", 600.0f);
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Short called!"));
 				BlackboardComp->SetValueAsFloat("StopDistance", 100.0f);
 			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Blackboard Component is null!"));
 		}
 	}
 }
 
-void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
-	UPrimitiveComponent* OtherComp,int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!aggresive)
 	{
@@ -188,7 +170,7 @@ void AEnemyBase::Recognition_OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	}
 }
 
-void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+void AEnemyBase::Recognition_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (!aggresive)
@@ -209,10 +191,6 @@ void AEnemyBase::SetAttackTarget(AActor* AttackTarget)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *AttackTarget->GetName());
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AttackTarget is null"));
-	}
 
 	HighestATPTarget = AttackTarget;
 	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
@@ -229,27 +207,21 @@ void AEnemyBase::SetAttackTarget(AActor* AttackTarget)
 			BlackboardComp->SetValueAsObject("AttackTarget", nullptr);
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("BlackboardComp is null"));
-	}
-
 }
-
 
 void AEnemyBase::DetectOtherObject()
 {
 	FVector Start = ObjectDetectArrow->GetComponentLocation();
-	FVector End = (ObjectDetectArrow->GetForwardVector() * 100.0f)+Start;
+	FVector End = (ObjectDetectArrow->GetForwardVector() * 100.0f) + Start;
 
 	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this); 
+	CollisionParams.AddIgnoredActor(this);
 
 	FCollisionObjectQueryParams ObjectQueryParams;
 	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
 	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel4);
 
-	FHitResult OutHit; 
+	FHitResult OutHit;
 
 	GetWorld()->LineTraceSingleByObjectType(OutHit, Start, End, ObjectQueryParams);
 
@@ -261,32 +233,15 @@ void AEnemyBase::DetectOtherObject()
 		{
 			FString ComponentName = HitComponent->GetName();
 
-			UE_LOG(LogTemp, Warning, TEXT("Hit Component Name: %s"), *ComponentName);
-
-			UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is true"));
 			detect_other_objects = true;
-			if (OutHit.GetActor() != nullptr)
-			{
-				FString ActorName = OutHit.GetActor()->GetName();
-				UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *ActorName);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("No actor hit."));
-			}
-			HighestATPTarget = OutHit.GetActor();
-			FString ActorName = HighestATPTarget->GetName();
-			UE_LOG(LogTemp, Warning, TEXT("HighestATPTarget Actor Name: %s"), *ActorName);
-		}
-		else UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is false2222"));
-	}
 
+			HighestATPTarget = OutHit.GetActor();
+		}
+	}
 	else
 	{
 		detect_other_objects = false;
-		UE_LOG(LogTemp, Warning, TEXT("detect_other_objects is false"));
 	}
-
 }
 
 TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
@@ -306,7 +261,6 @@ TPair<AActor*, int32> AEnemyBase::GetPlayerATP()
 
 		if (PlayerTaggedComponents.Num() > 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor with 'Player' tagged component: %s"), *Actor->GetName());
 			TaggedActors.Add(Actor);
 		}
 	}
@@ -348,10 +302,6 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 		{
 			TaggedActors.Add(Actor);
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor does not have FriendlyBuilding tag"));
-		}
 	}
 
 	for (AActor* Actor : TaggedActors)
@@ -359,18 +309,17 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 		ABaseBuilding* BuildingActor = Cast<ABaseBuilding>(Actor);
 		if (BuildingActor)
 		{
-			int32 CurrentATP = BuildingActor->GetBuildingATP();
-			if (CurrentATP > HighestATP)
+			if (BuildingActor->GetBuilt())
 			{
-				HighestATP = CurrentATP;
-				HighestTarget = Actor;
+				UE_LOG(LogTemp, Warning, TEXT("Successfully Get BuildingATP!"));
+				int32 CurrentATP = BuildingActor->GetBuildingATP();
+				if (CurrentATP > HighestATP)
+				{
+					HighestATP = CurrentATP;
+					HighestTarget = Actor;
+				}
 			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor is not of ABaseBuilding type"));
-		}
-
 	}
 
 	return TPair<AActor*, int32>(HighestTarget, HighestATP);
@@ -395,10 +344,6 @@ TPair<AActor*, int32> AEnemyBase::GetHighestAlliesATP()
 		{
 			TaggedActors.Add(Actor);
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor does not have PlayerAllies tag"));
-		}
 	}
 
 	for (AActor* Actor : TaggedActors)
@@ -413,11 +358,6 @@ TPair<AActor*, int32> AEnemyBase::GetHighestAlliesATP()
 				HighestTarget = Actor;
 			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor is not of ABaseBuilding type"));
-		}
-
 	}
 
 	return TPair<AActor*, int32>(HighestTarget, HighestATP);
@@ -427,7 +367,7 @@ TPair<AActor*, int32> AEnemyBase::GetHighestAlliesATP()
 void AEnemyBase::CheckDistance()
 {
 	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
-	float Distance=0;
+	float Distance = 0;
 	if (PlayerCharacter != nullptr)
 	{
 		Distance = GetHorizontalDistanceTo(PlayerCharacter);
@@ -455,16 +395,16 @@ void AEnemyBase::NpcDead_Implementation()
 	APawn::DetachFromControllerPendingDestroy();
 
 	DropItem();
-	PlayDieEffectFun(); 
+	PlayDieEffectFun();
 	OnDetroyEnemy.Broadcast(this);
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	float MontageLength=0;
+	float MontageLength = 0;
 
 	if (AnimInstance && DieMontage)
 	{
 		MontageLength = AnimInstance->Montage_Play(DieMontage, 1.0f, EMontagePlayReturnType::MontageLength);
-		
+
 	}
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::NpcDeadAfterDelay, MontageLength, false);
@@ -478,10 +418,10 @@ int AEnemyBase::RandomResourceDrop()
 	for (int i = 0; i < ResourceDropPosibilities.Num(); i++)
 	{
 		bool InRange = UKismetMathLibrary::InRange_IntInt(num, sum, sum + ResourceDropPosibilities[i], false, true);
-		
+
 		if (InRange)
 			return i;
-		
+
 		sum += ResourceDropPosibilities[i];
 	}
 
@@ -539,7 +479,7 @@ void AEnemyBase::SetActive(bool IsActive)
 
 	TArray<UActorComponent*> Comps;
 	GetComponents<UActorComponent>(Comps);
-	
+
 	for (UActorComponent* component : Comps)
 	{
 		component->SetComponentTickEnabled(IsActive);
@@ -557,35 +497,29 @@ void AEnemyBase::Tick(float DeltaTime)
 			DetectOtherObject();
 			if (!detect_other_objects)
 			{
-					TPair<AActor*, int32> building_result = GetHighestBuildingATP();
-					TPair<AActor*, int32> player_result = GetPlayerATP();
-					TPair<AActor*, int32> friendly_result = GetHighestAlliesATP();
+				TPair<AActor*, int32> building_result = GetHighestBuildingATP();
+				TPair<AActor*, int32> player_result = GetPlayerATP();
+				TPair<AActor*, int32> friendly_result = GetHighestAlliesATP();
 
-					// AActor의 포인터가 유효한지 확인하고, 그렇다면 해당 액터의 이름을 가져옵니다.
-					FString ActorName = (friendly_result.Key != nullptr) ? friendly_result.Key->GetName() : TEXT("None");
+				int32 HighestATPValue = -1;
 
-					// 이제 값을 로그로 출력합니다. 로그 카테고리는 'LogTemp'를 사용하며, 경고 수준으로 출력합니다.
-					UE_LOG(LogTemp, Warning, TEXT("Friendly Actor: %s, ATP Value: %d"), *ActorName, friendly_result.Value);
+				if (building_result.Value > HighestATPValue)
+				{
+					HighestATPValue = building_result.Value;
+					HighestATPTarget = building_result.Key;
+				}
 
-					int32 HighestATPValue = 0;
+				if (player_result.Value > HighestATPValue)
+				{
+					HighestATPValue = player_result.Value;
+					HighestATPTarget = player_result.Key;
+				}
 
-					if (building_result.Value > HighestATPValue) 
-					{
-						HighestATPValue = building_result.Value;
-						HighestATPTarget = building_result.Key;
-					}
-
-					if (player_result.Value > HighestATPValue) 
-					{
-						HighestATPValue = player_result.Value;
-						HighestATPTarget = player_result.Key;
-					}
-
-					if (friendly_result.Value > HighestATPValue) 
-					{
-						HighestATPValue = friendly_result.Value;
-						HighestATPTarget = friendly_result.Key;
-					}
+				if (friendly_result.Value > HighestATPValue)
+				{
+					HighestATPValue = friendly_result.Value;
+					HighestATPTarget = friendly_result.Key;
+				}
 			}
 		}
 		CheckDistance();
@@ -598,9 +532,8 @@ void AEnemyBase::FirstThunderAttacked()
 	TowerThunderTarget = this;
 	FindFirstThunderTarget();
 	if (IsValid(FirstThunderTarget))
-	{   
+	{
 		SpawnFirstThunder(FirstThunderTarget);
-		UE_LOG(LogTemp, Warning, TEXT("FirstThunderAttacked called!"));
 	}
 }
 
@@ -618,7 +551,6 @@ void AEnemyBase::FindFirstThunderTarget()
 	{
 		if (Component->ComponentHasTag(TEXT("Enemy")))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enemy Detected"));
 			TaggedActors.Add(Component->GetOwner());
 		}
 	}
@@ -627,37 +559,34 @@ void AEnemyBase::FindFirstThunderTarget()
 
 	switch (Value)
 	{
-		case 0:
+	case 0:
+	{
+		break;
+	}
+	case 1:
+	{
+		break;
+	}
+	default:
+	{
+		for (int i = 0; i < TaggedActors.Num(); i++)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("FindFirstThunderTarget called! 000"));
-			break;
-		}
-		case 1:
-		{
-			UE_LOG(LogTemp, Warning, TEXT("FindFirstThunderTarget called! 11"));
-			break;
-		}
-		default:
-		{
-			for (int i = 0; i < TaggedActors.Num(); i++)
+			if (TaggedActors[i] != this)
 			{
-				if (TaggedActors[i] != this)
-				{
-					Distance = UKismetMathLibrary::Vector_Distance(TaggedActors[i]->GetActorLocation(), GetActorLocation());
-					DisArray.Add(Distance);
-				}
-				else
-				{
-					DisArray.Add(1000000000.0f);
-				}
+				Distance = UKismetMathLibrary::Vector_Distance(TaggedActors[i]->GetActorLocation(), GetActorLocation());
+				DisArray.Add(Distance);
 			}
-
-			int32 IndexOfMinValue;
-			UKismetMathLibrary::MinOfFloatArray(DisArray, IndexOfMinValue, Distance);
-			FirstThunderTarget = TaggedActors[IndexOfMinValue];
-			UE_LOG(LogTemp, Warning, TEXT("FindFirstThunderTarget called! default"));
-			break;
+			else
+			{
+				DisArray.Add(1000000000.0f);
+			}
 		}
+
+		int32 IndexOfMinValue;
+		UKismetMathLibrary::MinOfFloatArray(DisArray, IndexOfMinValue, Distance);
+		FirstThunderTarget = TaggedActors[IndexOfMinValue];
+		break;
+	}
 	}
 }
 
@@ -697,7 +626,6 @@ void AEnemyBase::FindSecondThunderTarget(AActor* tower_target)
 	{
 		if (Component->ComponentHasTag(TEXT("Enemy")))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enemy Detected"));
 			TaggedActors.Add(Component->GetOwner());
 		}
 	}
@@ -706,38 +634,38 @@ void AEnemyBase::FindSecondThunderTarget(AActor* tower_target)
 
 	switch (Value)
 	{
-		case 0:
-			break;
-		case 1:
-			break;
-		case 2:
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+	{
+		if (TaggedActors[1] != this && TaggedActors[1] != tower_target)
 		{
-			if (TaggedActors[1] != this && TaggedActors[1] != tower_target)
-			{
-				SecondThunderTarget = TaggedActors[1];
-			}
-			break;
+			SecondThunderTarget = TaggedActors[1];
 		}
-		default:
+		break;
+	}
+	default:
+	{
+		for (int i = 0; i < TaggedActors.Num(); i++)
 		{
-			for (int i = 0; i < TaggedActors.Num(); i++)
+			if (TaggedActors[i] == this || TaggedActors[i] == tower_target)
 			{
-				if (TaggedActors[i] == this || TaggedActors[i] == tower_target)
-				{
-					DisArray.Add(10000000000.0f);
-				}
-				else
-				{
-					Distance = UKismetMathLibrary::Vector_Distance(TaggedActors[i]->GetActorLocation(), GetActorLocation());
-					DisArray.Add(Distance);
-				}
+				DisArray.Add(10000000000.0f);
 			}
+			else
+			{
+				Distance = UKismetMathLibrary::Vector_Distance(TaggedActors[i]->GetActorLocation(), GetActorLocation());
+				DisArray.Add(Distance);
+			}
+		}
 
-			int32 IndexOfMinValue;
-			UKismetMathLibrary::MinOfFloatArray(DisArray, IndexOfMinValue, Distance);
-			SecondThunderTarget = TaggedActors[IndexOfMinValue];
-			break;
-		}
+		int32 IndexOfMinValue;
+		UKismetMathLibrary::MinOfFloatArray(DisArray, IndexOfMinValue, Distance);
+		SecondThunderTarget = TaggedActors[IndexOfMinValue];
+		break;
+	}
 	}
 
 }

@@ -317,5 +317,6 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	FORCEINLINE UCapsuleComponent* GetCapsule() { return CapsuleComponent; }
 };
 
