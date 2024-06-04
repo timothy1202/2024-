@@ -65,7 +65,7 @@ public:
 	TArray<AEnemyBase*> Enemys;
 	
 	UPROPERTY(EditAnywhere)
-	int NextEnemyNum;
+	int NextEnemyNum = 0;
 };
 
 USTRUCT(Atomic, BlueprintType)
