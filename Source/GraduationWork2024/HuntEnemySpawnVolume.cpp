@@ -20,11 +20,15 @@ AHuntEnemySpawnVolume::AHuntEnemySpawnVolume()
 	Volume->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
 }
 
-void AHuntEnemySpawnVolume::Volume_OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AHuntEnemySpawnVolume::Initialize()
 {
-	if (OtherComp->ComponentHasTag("Player"))
+	PlayerRef = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+}
+
+void AHuntEnemySpawnVolume::StartLogic()
+{
+	if (PlayerRef != nullptr)
 	{
-		PlayerRef = OtherActor;
 		FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 		if (TimerManager.IsTimerActive(SpawnTimerHandle))
 		{
@@ -34,9 +38,9 @@ void AHuntEnemySpawnVolume::Volume_OnOverlapBegin(UPrimitiveComponent* Overlappe
 	}
 }
 
-void AHuntEnemySpawnVolume::Volume_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AHuntEnemySpawnVolume::EndLogic()
 {
-	if (OtherComp->ComponentHasTag("Player"))
+	if (PlayerRef != nullptr)
 	{
 		FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 		if (TimerManager.IsTimerActive(SpawnTimerHandle))
@@ -50,10 +54,11 @@ void AHuntEnemySpawnVolume::Volume_OnOverlapEnd(UPrimitiveComponent* OverlappedC
 void AHuntEnemySpawnVolume::SpawnEnemy(FVector Pos)
 {
 	UWorld* const World = GetWorld();
+	FVector Offset = FVector(0.f, 0.f, 100.f);
 
 	if (World != nullptr)
 	{
-		FTransform SpawnTransform(FRotator().ZeroRotator, Pos);
+		FTransform SpawnTransform(FRotator().ZeroRotator, Pos + Offset);
 		AEnemyBase* Enemy = GetWorld()->SpawnActorDeferred<AEnemyBase>(EnemyType, SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 		if (Enemy != nullptr)
 		{
@@ -70,15 +75,13 @@ void AHuntEnemySpawnVolume::DestroyEnemy()
 {
 	if (!EnemyArr.IsEmpty())
 	{
-		// 적NPC arr에서 제거 - 플레이어 화면 내에 없을 때
 		AEnemyBase* Enemy = nullptr;
 		float MaxDistance = 0.f;
 
-		// 멀리 있는 적부터 제거
 		for (AEnemyBase* Elem : EnemyArr)
 		{
 			FVector EnemyLocation = Elem->GetActorLocation();
-			FVector PlayerLocation = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation();
+			FVector PlayerLocation = PlayerRef->GetActorLocation();
 			float PlayerToEnemyDist = UKismetMathLibrary::Vector_Distance2D(EnemyLocation, PlayerLocation);
 			if (MaxDistance < PlayerToEnemyDist)
 			{
@@ -88,7 +91,6 @@ void AHuntEnemySpawnVolume::DestroyEnemy()
 		}
 		if (Enemy != nullptr)
 		{
-			// 3초 내에 렌더링 된 적이 있다면
 			if (!Enemy->WasRecentlyRendered(3.f))
 			{
 				EnemyArr.Remove(Enemy);
@@ -162,7 +164,6 @@ void AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy()
 			}
 		}
 	}
-	// 네비 상에서 가져올 수 있는 Volume의 한 위치를 구해서 적 NPC를 스폰 - 플레이어 화면 내에 없어야 함
 }
 
 void AHuntEnemySpawnVolume::OnEnemyDead(AEnemyBase* Enemy)
@@ -192,12 +193,6 @@ void AHuntEnemySpawnVolume::OnSequencer_Implementation(bool isEnable)
 void AHuntEnemySpawnVolume::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (EnemyType != nullptr)
-	{
-		Volume->OnComponentBeginOverlap.AddDynamic(this, &AHuntEnemySpawnVolume::Volume_OnOverlapBegin);
-		Volume->OnComponentEndOverlap.AddDynamic(this, &AHuntEnemySpawnVolume::Volume_OnOverlapEnd);
-	}
 }
 
 // Called every frame

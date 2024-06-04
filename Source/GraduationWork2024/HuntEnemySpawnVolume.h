@@ -53,6 +53,15 @@ public:
 	void Volume_OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION(BlueprintCallable)
+	void Initialize();
+
+	UFUNCTION(BlueprintCallable)
+	void StartLogic();
+
+	UFUNCTION(BlueprintCallable)
+	void EndLogic();
+
 	UFUNCTION()
 	void OnEnemyDead(AEnemyBase* Enemy);
 
