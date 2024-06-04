@@ -35,5 +35,8 @@
 			"Name": "AnimationBudgetAllocator",
 			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"Windows"
 	]
 }

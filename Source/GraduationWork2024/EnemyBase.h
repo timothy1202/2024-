@@ -22,6 +22,11 @@ struct FPosibilitesTray
 	GENERATED_BODY()
 
 public:
+	FPosibilitesTray()
+		: firstPosibility(0), secondPosibility(0), thirdPosibility(0) // 초기화
+	{
+	}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int firstPosibility;
 
