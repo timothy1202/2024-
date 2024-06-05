@@ -139,9 +139,9 @@ void AEnemyBase::Init()
 		}
 	}
 
-	if (MyController)
+	if (EnemyAIController)
 	{
-		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
+		UBlackboardComponent* BlackboardComp = EnemyAIController->GetBlackboardComponent();
 		if (BlackboardComp)
 		{
 			if (is_long_range_npc)
