@@ -225,12 +225,25 @@ void AEnemyBase::DetectOtherObject()
 
 	GetWorld()->LineTraceSingleByObjectType(OutHit, Start, End, ObjectQueryParams);
 
+	detect_other_objects = false;
 	if (OutHit.bBlockingHit)
 	{
 		DrawDebugLine(GetWorld(), Start, End, FColor::Red, 0, 0);
 		UPrimitiveComponent* HitComponent = OutHit.GetComponent();
 		if (HitComponent != nullptr && HitComponent->ComponentHasTag(TEXT("EnemyDetect")))
 		{
+			if (HitComponent->ComponentHasTag(TEXT("FriendlyBuilding")))
+			{
+				ABaseBuilding* BuildingActor = Cast<ABaseBuilding>(OutHit.GetActor());
+				if (BuildingActor)
+				{
+					if (!BuildingActor->GetBuilt())
+					{
+						return;
+					}
+				}
+			}
+
 			FString ComponentName = HitComponent->GetName();
 
 			detect_other_objects = true;
@@ -318,6 +331,10 @@ TPair<AActor*, int32> AEnemyBase::GetHighestBuildingATP()
 					HighestATP = CurrentATP;
 					HighestTarget = Actor;
 				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Building hasen't built!!!"));
 			}
 		}
 	}
