@@ -35,6 +35,7 @@ void AHuntEnemySpawnVolume::StartLogic()
 			TimerManager.ClearTimer(SpawnTimerHandle);
 		}
 		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy, 5.f, true);
+		UE_LOG(LogTemp, Warning, TEXT("Start Logic!!!"));
 	}
 }
 
