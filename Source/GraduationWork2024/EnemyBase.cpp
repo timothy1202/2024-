@@ -212,7 +212,7 @@ void AEnemyBase::SetAttackTarget(AActor* AttackTarget)
 void AEnemyBase::DetectOtherObject()
 {
 	FVector Start = ObjectDetectArrow->GetComponentLocation();
-	FVector End = (ObjectDetectArrow->GetForwardVector() * 100.0f) + Start;
+	FVector End = (ObjectDetectArrow->GetForwardVector() * 50.0f) + Start;
 
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
@@ -230,6 +230,7 @@ void AEnemyBase::DetectOtherObject()
 	{
 		DrawDebugLine(GetWorld(), Start, End, FColor::Red, 0, 0);
 		UPrimitiveComponent* HitComponent = OutHit.GetComponent();
+
 		if (HitComponent != nullptr && HitComponent->ComponentHasTag(TEXT("EnemyDetect")))
 		{
 			if (HitComponent->ComponentHasTag(TEXT("FriendlyBuilding")))
@@ -537,6 +538,18 @@ void AEnemyBase::Tick(float DeltaTime)
 					HighestATPValue = friendly_result.Value;
 					HighestATPTarget = friendly_result.Key;
 				}
+
+				// HighestATPTarget을 로그로 출력
+				if (HighestATPTarget)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Highest AT Target: %s"), *HighestATPTarget->GetName());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("No valid target found."));
+				}
+
+				UE_LOG(LogTemp, Warning, TEXT("Successfully Get BuildingATP!"));
 			}
 		}
 		CheckDistance();
