@@ -102,7 +102,6 @@ void AHuntEnemySpawnVolume::DestroyEnemy()
 	}
 	else
 	{
-		PlayerRef = nullptr;
 		GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
 	}
 }
@@ -134,7 +133,7 @@ void AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy()
 	{
 		if (PlayerRef != nullptr)
 		{
-			FVector Origin = PlayerRef->GetActorLocation();
+			FVector Origin = GetActorLocation();
 			if (auto* const NavSys = UNavigationSystemV1::GetCurrent(GetWorld()))
 			{
 				FNavLocation Loc;
