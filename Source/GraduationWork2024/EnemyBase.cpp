@@ -111,9 +111,10 @@ void AEnemyBase::Init()
 		EnemyAIController->ExecuteBT(MyBehaviorTree);
 	}
 
+	PawnMovement->MaxSpeed = EnemyNpc_RunSpeed;
 	if (aggresive)
 	{
-		PawnMovement->MaxSpeed = EnemyNpc_RunSpeed;
+		//PawnMovement->MaxSpeed = EnemyNpc_RunSpeed;
 
 		UBlackboardComponent* BlackboardComp = MyController->GetBlackboardComponent();
 		if (BlackboardComp)
