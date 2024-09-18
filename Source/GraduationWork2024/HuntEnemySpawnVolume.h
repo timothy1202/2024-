@@ -32,6 +32,7 @@ private:
 	AActor* PlayerRef = nullptr;
 	bool isCameraOut = false;
 	int32 count = 0;
+	int32 funcStack = 0;
 	
 public:	
 	// Sets default values for this actor's properties

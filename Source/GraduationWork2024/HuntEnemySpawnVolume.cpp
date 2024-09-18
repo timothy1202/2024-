@@ -34,7 +34,7 @@ void AHuntEnemySpawnVolume::StartLogic()
 		{
 			TimerManager.ClearTimer(SpawnTimerHandle);
 		}
-		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy, 5.f, true);
+		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy, 3.f, true);
 		UE_LOG(LogTemp, Warning, TEXT("Start Logic!!!"));
 	}
 }
@@ -48,7 +48,7 @@ void AHuntEnemySpawnVolume::EndLogic()
 		{
 			TimerManager.ClearTimer(SpawnTimerHandle);
 		}
-		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::DestroyEnemy, 1.f, true);
+		TimerManager.SetTimer(SpawnTimerHandle, this, &AHuntEnemySpawnVolume::DestroyEnemy, 0.5f, true);
 	}
 }
 
@@ -92,7 +92,8 @@ void AHuntEnemySpawnVolume::DestroyEnemy()
 		}
 		if (Enemy != nullptr)
 		{
-			if (!Enemy->WasRecentlyRendered(3.f))
+			float DistToEnemy = FVector::Distance(PlayerRef->GetActorLocation(), Enemy->GetActorLocation());
+			if (DistToEnemy >= 2500.0f)
 			{
 				EnemyArr.Remove(Enemy);
 				Enemy->Destroy();
@@ -133,19 +134,22 @@ void AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy()
 	{
 		if (PlayerRef != nullptr)
 		{
-			FVector Origin = GetActorLocation();
+			FVector Origin = PlayerRef->GetActorLocation();
 			if (auto* const NavSys = UNavigationSystemV1::GetCurrent(GetWorld()))
 			{
 				FNavLocation Loc;
 				FVector BoxExtent = Volume->GetScaledBoxExtent();
-				float MaxDistance = UKismetMathLibrary::Max(BoxExtent.X, BoxExtent.Y);
+				float MaxDistance = 3000.0f;
+				float MinDistance = 2000.0f;
 
 				if (NavSys->GetRandomReachablePointInRadius(Origin, MaxDistance, Loc))
 				{
 					FVector FinalLocation = Loc.Location;
 					const FBoxSphereBounds& Box = Volume->Bounds;
 
-					if (Box.GetBox().IsInside(FinalLocation) && !CheckPointInCamera(FinalLocation))
+					float TempDistance = FVector::Distance(PlayerRef->GetActorLocation(), FinalLocation);
+
+					if (Box.GetBox().IsInside(FinalLocation) && TempDistance >= MinDistance)
 					{
 						if (count >= MaxSpawnCount)
 						{
@@ -155,9 +159,15 @@ void AHuntEnemySpawnVolume::FindPositionAndSpawnHuntEnemy()
 						{
 							SpawnEnemy(FinalLocation);
 						}
+						funcStack = 0;
 					}
 					else
 					{
+						funcStack++;
+
+						if (funcStack >= 100)
+							return;
+
 						FindPositionAndSpawnHuntEnemy();
 					}
 				}
