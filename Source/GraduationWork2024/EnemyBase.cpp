@@ -229,7 +229,7 @@ void AEnemyBase::DetectOtherObject()
 	detect_other_objects = false;
 	if (OutHit.bBlockingHit)
 	{
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, 0, 0);
+		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, 0, 0);
 		UPrimitiveComponent* HitComponent = OutHit.GetComponent();
 
 		if (HitComponent != nullptr && HitComponent->ComponentHasTag(TEXT("EnemyDetect")))
