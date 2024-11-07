@@ -102,7 +102,7 @@ void AEnemyBase::Init()
 	FVector Origin;
 	FVector BoxExtent;
 	float SphereRadius = RecognitionBoundary->GetScaledSphereRadius();
-	show_health_dis = SphereRadius * 1.5f;
+	show_health_dis = SphereRadius;
 
 	AAIController* MyController = UAIBlueprintHelperLibrary::GetAIController(this);
 	AAIC_EnemyBase* EnemyAIController = Cast<AAIC_EnemyBase>(MyController);
@@ -392,11 +392,19 @@ void AEnemyBase::CheckDistance()
 		Distance = GetHorizontalDistanceTo(PlayerCharacter);
 	}
 
-	if (Distance < show_health_dis)
-		HealthWidget->SetVisibility(true);
+	if (!IsNpcDead && bToggleUI)
+	{
+		if (Distance < show_health_dis) {
+			HealthWidget->SetVisibility(true);
+		}
+		else {
+			HealthWidget->SetVisibility(false);
+		}
+	}
 	else
+	{
 		HealthWidget->SetVisibility(false);
-
+	}
 }
 
 void AEnemyBase::UpdateDamagedHealthBar(float damage)
@@ -509,6 +517,7 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	CheckDistance();
 	if (!IsNpcDead)
 	{
 		if (aggresive)
@@ -553,7 +562,6 @@ void AEnemyBase::Tick(float DeltaTime)
 				UE_LOG(LogTemp, Warning, TEXT("Successfully Get BuildingATP!"));
 			}
 		}
-		CheckDistance();
 	}
 }
 
